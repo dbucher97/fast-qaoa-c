@@ -1,0 +1,111 @@
+import numpy as np
+from fastqaoa.ctypes.qaoa import qaoa
+from fastqaoa.ctypes.optimize import optimize_qaoa
+from fastqaoa.ctypes import Diagonals
+import warnings
+import qubovert as qv
+
+import networkx as nx
+
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
+    import pennylane as qml
+    import pennylane.numpy as qnp
+
+
+def test_opt_qaoa_min_vertex_cover():
+    # replica of the hamiltonian
+    puso = qv.PUSO(
+        {
+            (0,): 0.5,
+            (1,): 0.5,
+            (2,): 1.25,
+            (3,): -0.25,
+            (0, 1): 0.75,
+            (0, 2): 0.75,
+            (1, 2): 0.75,
+            (2, 3): 0.75,
+        }
+    )
+
+    b = puso.to_pubo()
+
+    b = {sum(1 << i for i in k) if len(k) > 0 else 0: v for k,v in b.items()}
+    keys = list(b.keys())
+    vals = list(b.values())
+
+    dg = Diagonals.brute_force(4, keys, vals)
+
+    betas = np.ones(5) * 0.1
+    gammas = np.ones(5) * 0.1
+
+    a = np.abs(qaoa(dg, betas, gammas).to_numpy()) ** 2
+    a = a.dot(dg.to_numpy())
+
+    betas, gammas = optimize_qaoa(dg, dg, betas, gammas)
+
+    b = np.abs(qaoa(dg, betas, gammas).to_numpy()) ** 2
+    b = b.dot(dg.to_numpy())
+
+    assert b < a
+
+
+def test_opt_qaoa_min_vertex_cover2():
+    edges = [(0, 1), (1, 2), (2, 0), (2, 3)]
+    graph = nx.Graph(edges)
+    cost_h, mixer_h = qml.qaoa.min_vertex_cover(graph, constrained=False)
+
+    betas = np.ones(5) * 0.1
+    gammas = np.ones(5) * 0.1
+
+    tbetas = qnp.array(betas, requires_grad=True)
+    tgammas = qnp.array(gammas, requires_grad=True)
+
+    dev = qml.device("default.qubit", wires=4)
+
+    @qml.qnode(dev)
+    def circuit(betas, gammas):
+        for w in range(4):
+            qml.Hadamard(wires=w)
+        for beta, gamma in zip(betas, gammas):
+            qml.qaoa.cost_layer(gamma, cost_h)
+            qml.qaoa.mixer_layer(beta, mixer_h)
+        return qml.expval(cost_h)
+
+    opt = qml.AdamOptimizer()
+
+    for _ in range(10):
+        (tbetas, tgammas), _ = opt.step_and_cost(circuit, tbetas, tgammas)
+    cost = circuit(tbetas, tgammas)
+    print(cost)
+
+    # replica of the hamiltonian:
+    puso = qv.PUSO(
+        {
+            (0,): 0.5,
+            (1,): 0.5,
+            (2,): 1.25,
+            (3,): -0.25,
+            (0, 1): 0.75,
+            (0, 2): 0.75,
+            (1, 2): 0.75,
+            (2, 3): 0.75,
+        }
+    )
+
+    b = puso.to_pubo()
+
+    b = {sum(1 << i for i in k) if len(k) > 0 else 0: v for k,v in b.items()}
+    keys = list(b.keys())
+    vals = list(b.values())
+
+    dg = Diagonals.brute_force(4, keys, vals)
+
+    betas, gammas = optimize_qaoa(dg, dg, betas, gammas, maxiter=10)
+
+    b = np.abs(qaoa(dg, betas, gammas).to_numpy()) ** 2
+    cost2 = b.dot(dg.to_numpy())
+
+    assert np.isclose(cost, cost2)
+    assert np.allclose(tbetas, betas)
+    assert np.allclose(tgammas, gammas)
