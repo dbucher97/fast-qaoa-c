@@ -83,18 +83,6 @@ statevector_t *qaoa(const int depth, const diagonals_t *dg, const double *betas,
   return sv;
 }
 
-inline void sum_x_prod(const statevector_t *sv_left,
-                       const statevector_t *sv_right, double *res) {
-  *res = 0;
-  for (size_t i = 0; i < 1 << sv_left->n_qubits; i++) {
-    cmplx s = 0;
-    for (uint8_t j = 0; j < sv_right->n_qubits; j++) {
-      s += sv_right->data[i ^ (1 << j)];
-    }
-    *res -= 2 * cimag(conj(s) * sv_left->data[i]);
-  }
-}
-
 double grad_qaoa_inner(statevector_t *sv_left, statevector_t *sv_right,
                        const int depth, const diagonals_t *dg,
                        const diagonals_t *cost, const double *betas,

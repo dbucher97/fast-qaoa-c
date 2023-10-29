@@ -111,7 +111,7 @@ diagonals_t *dg_mask(diagonals_t *dg, diagonals_t *lhs, double rhs,
 }
 
 diagonals_t *dg_quad_penalty(diagonals_t *dg, diagonals_t *lhs, double rhs,
-                             cmp_kind cmp, double* penalty) {
+                             cmp_kind cmp, double *penalty) {
   diagonals_t *ret = dg_clone(dg);
   double diff;
   bool cmp_ok;
@@ -184,8 +184,7 @@ void dg_scale(diagonals_t *diags, double f) {
     double mv = diags->max_val;
     diags->max_val = f * diags->min_val;
     diags->min_val = f * mv;
-  }
-  else {
+  } else {
     diags->max_val *= f;
     diags->min_val *= f;
   }
@@ -198,3 +197,4 @@ void dg_shift(diagonals_t *diags, double f) {
   diags->min_val += f;
   diags->max_val += f;
 }
+
