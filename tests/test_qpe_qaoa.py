@@ -200,14 +200,13 @@ def test_grad_qpe_qaoa():
             ptot *= p
             state = state / jnp.sqrt(p)
 
-        return ptot * jnp.dot(cd, jnp.abs(state[:1 << N]) ** 2)
+        return ptot * jnp.dot(cd, jnp.abs(state[:1 << N]) ** 2) / ptot
 
-    print(func(betas, gammas))
-    gb, gg = jax.grad(func, argnums=(0, 1))(betas, gammas)
-    print(gb, gg)
+    pl_beta_gradients, pl_gamma_gradients = jax.grad(func, argnums=(0, 1))(betas, gammas)
 
     interpolator = get_indicator_interpolator(M, 6)
     constr = interpolate_diagonals(interpolator, gs)
-    print(grad_qpe_qaoa(fs, cs, constr, betas, gammas))
+    beta_gradients, gamma_gradients = grad_qpe_qaoa(fs, cs, constr, betas, gammas)
 
-    assert False
+    assert np.allclose(pl_beta_gradients, beta_gradients)
+    assert np.allclose(pl_gamma_gradients, gamma_gradients)

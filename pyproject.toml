@@ -8,12 +8,12 @@ packages = [{include = "fastqaoa"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-pennylane = "^0.32.0"
 networkx = "^3.2"
 qubovert = "^1.2.5"
 jax = {version = "0.4.17", extras = ["cpu"]}
 matplotlib = "^3.8.0"
 seaborn = "^0.13.0"
+pennylane = "^0.32.0"
 
 
 [tool.poetry.group.dev.dependencies]
