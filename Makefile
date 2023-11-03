@@ -3,17 +3,27 @@ SRC_DIR = ./src
 
 BUILD_DIR = ./build
 
-CFLAGS ?= -I$(INC_DIR) -O3 -I/opt/homebrew/include/ -DACCELERATE_NEW_LAPACK
+
+CFLAGS ?= -I$(INC_DIR) -O3 
+
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+TARGET = libqaoa.so
+DYLIB = -fPIC -shared
+else
+CFLAGS += -I/opt/homebrew/include/
+LDFLAGS += -L/opt/homebrew/lib/
+TARGET = libqaoa.dylib
+DYLIB = -dynamiclib
+endif
 
 SRCS := $(shell find $(SRC_DIR) -name *.c)
 OBJS := $(SRCS:%.c=$(BUILD_DIR)/%.o)
 
-TARGET = libqaoa.dylib
 
-LDFLAGS += -L/opt/homebrew/lib/ -framework Accelerate
 
 $(BUILD_DIR)/$(TARGET): $(OBJS)
-	$(CC) $(OBJS) -dynamiclib -o $@ $(LDFLAGS) -llbfgs
+	$(CC) $(OBJS) $(DYLIB) -o $@ $(LDFLAGS) -llbfgs
 
 
 $(BUILD_DIR)/%.o: %.c
