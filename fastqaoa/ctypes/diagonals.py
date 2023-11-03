@@ -44,7 +44,7 @@ class Diagonals(C.Structure):
         ...
 
     def brute_force_qv(model: qv.PUBO) -> "Diagonals":
-        b = {sum(1 << i for i in k) if len(k) > 0 else 0: v for k, v in b.items()}
+        b = {sum(1 << i for i in k) if len(k) > 0 else 0: v for k, v in model.items()}
         keys = list(b.keys())
         vals = list(b.values())
 

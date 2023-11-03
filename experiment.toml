@@ -1,0 +1,25 @@
+[integer]
+problem = "IntegerKnapsack"
+sizes = [6, 8]
+instances = 3
+
+depths = [1, 2]
+
+interpolate = true
+initial = "constant"
+beta_scale = 0.1
+gamma_scale = 0.1
+
+[[integer.qaoa]]
+kind = "mask"
+
+[[integer.qaoa]]
+kind = "quad_penalty"
+cost = "default"
+settings = {penalty = "auto"}
+
+[[integer.qaoa]]
+kind = "quad_penalty_full_problem"
+cost = "default"
+settings = {penalty = "auto"}
+until_size = 14
