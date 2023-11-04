@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 import numpy as np
 
-depth = 6
+depth = 1
 
 betas = np.ones(depth) * 0.1
 gammas = np.ones(depth) * 0.1
@@ -21,7 +21,7 @@ for i in Ns:
     dg = Diagonals.from_numpy(x)
 
     a = time.perf_counter()
-    qaoa(dg, betas, gammas)
+    optimize_qaoa_lbfgs(dg, dg, betas, gammas)
     delta = time.perf_counter() - a
     delta *= 1e3
 
@@ -29,19 +29,7 @@ for i in Ns:
 
     print(f"{i}: {delta} ms")
 
-    a = time.perf_counter()
-    res = x
-    for _ in range(depth):
-        res = np.fft.fft(res)
-    delta = time.perf_counter() - a
-    delta *= 1e3
-
-    times_fft.append(delta)
-
-    print(f"{i}: {delta} ms")
-
 
 plt.plot(Ns, times)
-plt.plot(Ns, times_fft)
 plt.yscale("log")
 plt.show()
