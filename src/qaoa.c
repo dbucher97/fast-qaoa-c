@@ -12,62 +12,63 @@ void apply_diagonals(statevector_t *sv, const diagonals_t *dg,
   }
 }
 
-void apply_rx_4radix(statevector_t *sv, const double beta) {
-  size_t mask = (1 << sv->n_qubits) - 1;
-
-  double s = sin(beta);
-  double c = cos(beta);
-  double x = c * c;
-  double y = s * s;
-  double z = -c * s;
-
-  cmplx *data = sv->data;
-  for (size_t q = 0; q < sv->n_qubits; q += 2) {
-    for (size_t idx = 0; idx < (1 << (sv->n_qubits - 2)); idx++) {
-      size_t i1 = (idx & ~(mask >> q)) << 2 | (idx & (mask >> q));
-      size_t i2 = i1 ^ (1 << q);
-      size_t i3 = i1 ^ (1 << (q + 1));
-      size_t i4 = i3 ^ (1 << q);
-      cmplx a = data[i1];
-      cmplx b = data[i2];
-      cmplx c = data[i3];
-      cmplx d = data[i4];
-      cmplx bc = cimag(b) + cimag(c) + I * (creal(b) + creal(c));
-      cmplx ad = cimag(a) + cimag(d) + I * (creal(a) + creal(d));
-
-      data[i1] = x * a + z * bc + y * d;
-      data[i2] = z * ad + x * b + y * c;
-      data[i3] = z * ad + x * c + y * b;
-      data[i4] = y * a + z * bc + x * d;
-    }
-  }
-}
-
-void apply_rx_old(statevector_t *sv, const double beta) {
-  size_t mask = (1 << sv->n_qubits) - 1;
-
-  cmplx s = -I * sin(beta);
-  double c = cos(beta);
-
-  cmplx *data = sv->data;
-  for (size_t q = 0; q < sv->n_qubits; q++) {
-    for (size_t idx = 0; idx < (1 << (sv->n_qubits - 1)); idx++) {
-      size_t i1 = (idx & (mask << q)) << 1 | (idx & ~(mask << q));
-      size_t i2 = i1 ^ (1 << q);
-      cmplx a = data[i1];
-      cmplx b = data[i2];
-
-      data[i1] = c * a + s * b;
-      data[i2] = c * b + s * a;
-    }
-  }
-}
-
 void apply_rx(statevector_t *sv, const double beta) {
   frx_plan_t* plan = frx_make_plan(sv, RDX4);
   frx_apply(plan, sv, beta);
   frx_free(plan);
 }
+
+
+// void apply_rx_4radix(statevector_t *sv, const double beta) {
+//   size_t mask = (1 << sv->n_qubits) - 1;
+//
+//   double s = sin(beta);
+//   double c = cos(beta);
+//   double x = c * c;
+//   double y = s * s;
+//   double z = -c * s;
+//
+//   cmplx *data = sv->data;
+//   for (size_t q = 0; q < sv->n_qubits; q += 2) {
+//     for (size_t idx = 0; idx < (1 << (sv->n_qubits - 2)); idx++) {
+//       size_t i1 = (idx & ~(mask >> q)) << 2 | (idx & (mask >> q));
+//       size_t i2 = i1 ^ (1 << q);
+//       size_t i3 = i1 ^ (1 << (q + 1));
+//       size_t i4 = i3 ^ (1 << q);
+//       cmplx a = data[i1];
+//       cmplx b = data[i2];
+//       cmplx c = data[i3];
+//       cmplx d = data[i4];
+//       cmplx bc = cimag(b) + cimag(c) + I * (creal(b) + creal(c));
+//       cmplx ad = cimag(a) + cimag(d) + I * (creal(a) + creal(d));
+//
+//       data[i1] = x * a + z * bc + y * d;
+//       data[i2] = z * ad + x * b + y * c;
+//       data[i3] = z * ad + x * c + y * b;
+//       data[i4] = y * a + z * bc + x * d;
+//     }
+//   }
+// }
+//
+// void apply_rx_old(statevector_t *sv, const double beta) {
+//   size_t mask = (1 << sv->n_qubits) - 1;
+//
+//   cmplx s = -I * sin(beta);
+//   double c = cos(beta);
+//
+//   cmplx *data = sv->data;
+//   for (size_t q = 0; q < sv->n_qubits; q++) {
+//     for (size_t idx = 0; idx < (1 << (sv->n_qubits - 1)); idx++) {
+//       size_t i1 = (idx & (mask << q)) << 1 | (idx & ~(mask << q));
+//       size_t i2 = i1 ^ (1 << q);
+//       cmplx a = data[i1];
+//       cmplx b = data[i2];
+//
+//       data[i1] = c * a + s * b;
+//       data[i2] = c * b + s * a;
+//     }
+//   }
+// }
 
 // void apply_rx(statevector_t *sv, const double beta) {
 //   // cmplx facs[sv->n_qubits + 1];
