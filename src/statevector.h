@@ -1,4 +1,4 @@
-#include "cmplx.h"
+#include "mtypes.h"
 #include "diagonals.h"
 #include <stdint.h>
 #include <stdlib.h>
@@ -25,7 +25,7 @@ void sv_free(statevector_t *sv);
 
 void sv_print(const statevector_t *sv);
 
-double sv_normalize(statevector_t *sv);
+real sv_normalize(statevector_t *sv);
 
 inline void sv_mult(statevector_t *sv, const diagonals_t *dg) {
   for (size_t i = 0; i < 1 << sv->n_qubits; i++) {

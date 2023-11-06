@@ -1,7 +1,7 @@
-import ctypes as C
+from .lib import C
 
-class c_double_complex(C.Structure): 
-    _fields_ = [("real", C.c_double),("imag", C.c_double)]
+class c_complex(C.Structure):
+    _fields_ = [("real", C.m_real),("imag", C.m_real)]
 
     @property
     def value(self):

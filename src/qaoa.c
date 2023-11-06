@@ -3,30 +3,29 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <Accelerate/Accelerate.h>
 
 void apply_diagonals(statevector_t *sv, const diagonals_t *dg,
-                     const double gamma) {
+                     const real gamma) {
   for (size_t i = 0; i < 1 << sv->n_qubits; i++) {
     sv->data[i] *= cos(dg->data[i] * gamma) - I * sin(dg->data[i] * gamma);
   }
 }
 
-void apply_rx(statevector_t *sv, const double beta) {
+void apply_rx(statevector_t *sv, const real beta) {
   frx_plan_t* plan = frx_make_plan(sv, RDX4);
   frx_apply(plan, sv, beta);
   frx_free(plan);
 }
 
 
-// void apply_rx_4radix(statevector_t *sv, const double beta) {
+// void apply_rx_4radix(statevector_t *sv, const real beta) {
 //   size_t mask = (1 << sv->n_qubits) - 1;
 //
-//   double s = sin(beta);
-//   double c = cos(beta);
-//   double x = c * c;
-//   double y = s * s;
-//   double z = -c * s;
+//   real s = sin(beta);
+//   real c = cos(beta);
+//   real x = c * c;
+//   real y = s * s;
+//   real z = -c * s;
 //
 //   cmplx *data = sv->data;
 //   for (size_t q = 0; q < sv->n_qubits; q += 2) {
@@ -50,11 +49,11 @@ void apply_rx(statevector_t *sv, const double beta) {
 //   }
 // }
 //
-// void apply_rx_old(statevector_t *sv, const double beta) {
+// void apply_rx_old(statevector_t *sv, const real beta) {
 //   size_t mask = (1 << sv->n_qubits) - 1;
 //
 //   cmplx s = -I * sin(beta);
-//   double c = cos(beta);
+//   real c = cos(beta);
 //
 //   cmplx *data = sv->data;
 //   for (size_t q = 0; q < sv->n_qubits; q++) {
@@ -70,9 +69,9 @@ void apply_rx(statevector_t *sv, const double beta) {
 //   }
 // }
 
-// void apply_rx(statevector_t *sv, const double beta) {
+// void apply_rx(statevector_t *sv, const real beta) {
 //   // cmplx facs[sv->n_qubits + 1];
-//   // double norm = 1 / (double)(1 << sv->n_qubits);
+//   // real norm = 1 / (real)(1 << sv->n_qubits);
 //   // facs[0] = cexp(I * beta * sv->n_qubits);
 //   // cmplx delta = cexp(-2 * I * beta);
 //   // for (uint8_t i = 1; i <= sv->n_qubits; i++) {
@@ -121,7 +120,7 @@ void apply_rx(statevector_t *sv, const double beta) {
 // }
 
 void qaoa_inner(statevector_t *sv, frx_plan_t* plan, const int depth, const diagonals_t *dg,
-                const double *betas, const double *gammas) {
+                const real *betas, const real *gammas) {
   cmplx val = 1 / sqrt(1 << sv->n_qubits);
   for (size_t i = 0; i < 1 << sv->n_qubits; i++) {
     sv->data[i] = val;
@@ -134,8 +133,8 @@ void qaoa_inner(statevector_t *sv, frx_plan_t* plan, const int depth, const diag
   }
 }
 
-statevector_t *qaoa(const int depth, const diagonals_t *dg, const double *betas,
-                    const double *gammas) {
+statevector_t *qaoa(const int depth, const diagonals_t *dg, const real *betas,
+                    const real *gammas) {
   statevector_t *sv = sv_malloc(dg->n_qubits);
   frx_plan_t* plan = frx_make_plan(sv, RDX4);
 
@@ -147,9 +146,9 @@ statevector_t *qaoa(const int depth, const diagonals_t *dg, const double *betas,
 
 void grad_qaoa_inner(statevector_t *sv_left, statevector_t *sv_right, frx_plan_t* plan,
                      const int depth, const diagonals_t *dg,
-                     const diagonals_t *cost, const double *betas,
-                     const double *gammas, double *beta_gradients,
-                     double *gamma_gradients, double *expectation_value) {
+                     const diagonals_t *cost, const real *betas,
+                     const real *gammas, real *beta_gradients,
+                     real *gamma_gradients, real *expectation_value) {
   qaoa_inner(sv_left, plan, depth, dg, betas, gammas);
   sv_copy(sv_left, sv_right->data);
 
@@ -178,15 +177,15 @@ void grad_qaoa_inner(statevector_t *sv_left, statevector_t *sv_right, frx_plan_t
 
 }
 
-double grad_qaoa(const int depth, const diagonals_t *dg,
-                 const diagonals_t *cost, const double *betas,
-                 const double *gammas, double *beta_gradients,
-                 double *gamma_gradients) {
+real grad_qaoa(const int depth, const diagonals_t *dg,
+                 const diagonals_t *cost, const real *betas,
+                 const real *gammas, real *beta_gradients,
+                 real *gamma_gradients) {
   statevector_t *sv_left = sv_malloc(dg->n_qubits);
   statevector_t *sv_right = sv_malloc(dg->n_qubits);
   frx_plan_t* plan = frx_make_plan(sv_left, RDX4);
 
-  double expectation_value;
+  real expectation_value;
   grad_qaoa_inner(sv_left, sv_right, plan, depth, dg, cost, betas, gammas,
                   beta_gradients, gamma_gradients, &expectation_value);
 

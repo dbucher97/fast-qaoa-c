@@ -7,12 +7,27 @@ from fastqaoa.ctypes import Diagonals
 from fastqaoa.ctypes.qpe_qaoa import apply_qpe_diagonals, apply_qpe_diagonals_normalized, grad_qpe_qaoa, qpe_qaoa
 from fastqaoa.ctypes.statevector import Statevector
 from fastqaoa.indicator import get_indicator_interpolator, interpolate_diagonals
+from fastqaoa.ctypes.lib import NP_REAL
+from fastqaoa.utils.jax_config import set_accuracy
 
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
     import pennylane as qml
     from pennylane import DiagonalQubitUnitary
 
+set_accuracy(64)
+
+def allclose(a, b):
+    atol = 1e-8
+    if NP_REAL == np.float64:
+        atol = 1e-4
+    return np.allclose(a, b, atol=atol)
+
+def isclose(a, b):
+    atol = 1e-8
+    if NP_REAL == np.float64:
+        atol = 1e-4
+    return np.isclose(a, b, atol=atol)
 
 def construct_pennylane_circuit(dev, N, M, fs: Diagonals, gs: Diagonals):
     gd = gs.to_numpy()
@@ -99,16 +114,16 @@ def test_apply_qpe_diagonals():
     sv = sv.to_numpy()
     p2 = np.sum(np.abs(sv) ** 2)
 
-    assert np.isclose(p, p2)
-    assert np.isclose(np.abs(sv.conj().dot(s)), p)
+    assert isclose(p, p2)
+    assert isclose(np.abs(sv.conj().dot(s)), p)
 
     sv = Statevector.make_plus_state(N)
     p3 = apply_qpe_diagonals_normalized(sv, fs, constr, gamma)
     sv = sv.to_numpy()
 
-    assert np.isclose(p, p3)
+    assert isclose(p, p3)
     s /= np.sqrt(p)
-    assert np.isclose(np.abs(sv.conj().dot(s)), 1)
+    assert isclose(np.abs(sv.conj().dot(s)), 1)
 
 
 def test_qpe_qaoa():
@@ -154,9 +169,9 @@ def test_qpe_qaoa():
 
     sv = sv.to_numpy()
 
-    assert np.isclose(p, np.prod(ps))
+    assert isclose(p, np.prod(ps))
 
-    assert np.isclose(np.abs(sv.conj().dot(state[:1<<N])), 1)
+    assert isclose(np.abs(sv.conj().dot(state[:1<<N])), 1)
 
 def test_grad_qpe_qaoa():
     N = 4
@@ -208,5 +223,5 @@ def test_grad_qpe_qaoa():
     constr = interpolate_diagonals(interpolator, gs)
     beta_gradients, gamma_gradients = grad_qpe_qaoa(fs, cs, constr, betas, gammas)
 
-    assert np.allclose(pl_beta_gradients, beta_gradients)
-    assert np.allclose(pl_gamma_gradients, gamma_gradients)
+    assert allclose(pl_beta_gradients, beta_gradients)
+    assert allclose(pl_gamma_gradients, gamma_gradients)

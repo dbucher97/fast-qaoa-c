@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include "cmplx.h"
+#include "mtypes.h"
 #include "statevector.h"
 
 #ifndef _FRX
@@ -20,14 +20,14 @@ typedef struct frx_plan_t {
     Butterfly max_butterfly;
     Butterfly* butterflies;
     cmplx* buffer;
-    double c, cc, ccc, s, ss, sss, sc, ssc, scc;
+    real c, cc, ccc, s, ss, sss, sc, ssc, scc;
 } frx_plan_t;
 
 frx_plan_t* frx_make_plan(statevector_t* sv, Butterfly max_butterfly);
 
 void frx_free(frx_plan_t* plan);
 
-void frx_apply(frx_plan_t* plan, statevector_t* sv, double beta);
+void frx_apply(frx_plan_t* plan, statevector_t* sv, real beta);
 
 #endif
 

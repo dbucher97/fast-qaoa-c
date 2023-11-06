@@ -3,6 +3,7 @@
 #include "qaoa.h"
 #include "qpe_qaoa.h"
 #include "statevector.h"
+#include "mtypes.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,27 +16,27 @@
   { NULL, NULL, NULL, NULL, 0, NULL, lr, EPS, tol, BETA1, BETA2, maxiter }
 
 typedef struct adam_state_t {
-  double *m_betas;
-  double *m_gammas;
-  double *w_betas;
-  double *w_gammas;
+  real *m_betas;
+  real *m_gammas;
+  real *w_betas;
+  real *w_gammas;
   int it;
-  double *trace;
-  const double lr;
-  const double eps;
-  const double tol;
-  const double beta1;
-  const double beta2;
+  real *trace;
+  const real lr;
+  const real eps;
+  const real tol;
+  const real beta1;
+  const real beta2;
   const int maxiter;
 } adam_state_t;
 
-void opt_init_adam_state(adam_state_t *state, const double lr,
-                         const int maxiter, const double tol, const int depth) {
-  state->m_betas = (double *)malloc(sizeof(double) * depth);
-  state->m_gammas = (double *)malloc(sizeof(double) * depth);
-  state->w_betas = (double *)malloc(sizeof(double) * depth);
-  state->w_gammas = (double *)malloc(sizeof(double) * depth);
-  state->trace = (double *)malloc(sizeof(double) * maxiter);
+void opt_init_adam_state(adam_state_t *state, const real lr,
+                         const int maxiter, const real tol, const int depth) {
+  state->m_betas = (real *)malloc(sizeof(real) * depth);
+  state->m_gammas = (real *)malloc(sizeof(real) * depth);
+  state->w_betas = (real *)malloc(sizeof(real) * depth);
+  state->w_gammas = (real *)malloc(sizeof(real) * depth);
+  state->trace = (real *)malloc(sizeof(real) * maxiter);
 
   for (int i = 0; i < depth; i++) {
     state->m_betas[i] = 0;
@@ -54,10 +55,10 @@ void opt_free_adam_state(adam_state_t *state) {
 }
 
 void opt_adam_qaoa(const int depth, const diagonals_t *dg,
-                   const diagonals_t *cost, double *betas, double *gammas,
-                   double lr, int maxiter, double tol) {
-  double *grad_betas = (double *)malloc(sizeof(double) * depth);
-  double *grad_gammas = (double *)malloc(sizeof(double) * depth);
+                   const diagonals_t *cost, real *betas, real *gammas,
+                   real lr, int maxiter, real tol) {
+  real *grad_betas = (real *)malloc(sizeof(real) * depth);
+  real *grad_gammas = (real *)malloc(sizeof(real) * depth);
 
   statevector_t *sv_left = sv_malloc(dg->n_qubits);
   statevector_t *sv_right = sv_malloc(dg->n_qubits);
@@ -67,7 +68,7 @@ void opt_adam_qaoa(const int depth, const diagonals_t *dg,
   adam_state_t state = NEW_ADAM_STATE;
   opt_init_adam_state(&state, lr, maxiter, tol, depth);
 
-  double last_val = INFINITY;
+  real last_val = INFINITY;
 
   for (; state.it < state.maxiter;) {
     grad_qaoa_inner(sv_left, sv_right, plan, depth, dg, cost, betas, gammas,
@@ -79,7 +80,7 @@ void opt_adam_qaoa(const int depth, const diagonals_t *dg,
 
     state.it += 1;
 
-    double lrit = state.lr * sqrt(1 - pow(state.beta2, state.it)) /
+    real lrit = state.lr * sqrt(1 - pow(state.beta2, state.it)) /
                   (1 - pow(state.beta1, state.it));
 
     for (int p = 0; p < depth; p++) {
@@ -110,10 +111,10 @@ void opt_adam_qaoa(const int depth, const diagonals_t *dg,
 
 void opt_adam_qpe_qaoa(const int depth, const diagonals_t *dg,
                        const diagonals_t *cost, const diagonals_t *constr,
-                       double *betas, double *gammas, double lr, int maxiter,
-                       double tol) {
-  double *grad_betas = (double *)malloc(sizeof(double) * depth);
-  double *grad_gammas = (double *)malloc(sizeof(double) * depth);
+                       real *betas, real *gammas, real lr, int maxiter,
+                       real tol) {
+  real *grad_betas = (real *)malloc(sizeof(real) * depth);
+  real *grad_gammas = (real *)malloc(sizeof(real) * depth);
 
   statevector_t *sv_left = sv_malloc(dg->n_qubits);
   statevector_t *sv_right = sv_malloc(dg->n_qubits);
@@ -124,9 +125,9 @@ void opt_adam_qpe_qaoa(const int depth, const diagonals_t *dg,
   adam_state_t state = NEW_ADAM_STATE;
   opt_init_adam_state(&state, lr, maxiter, tol, depth);
 
-  double last_val = INFINITY;
+  real last_val = INFINITY;
 
-  double psucc;
+  real psucc;
 
   for (; state.it < state.maxiter;) {
     grad_qpe_qaoa_inner(sv_left, sv_right, sv_left_p, plan, depth, dg, cost,
@@ -139,7 +140,7 @@ void opt_adam_qpe_qaoa(const int depth, const diagonals_t *dg,
 
     state.it += 1;
 
-    double lrit = state.lr * sqrt(1 - pow(state.beta2, state.it)) /
+    real lrit = state.lr * sqrt(1 - pow(state.beta2, state.it)) /
                   (1 - pow(state.beta1, state.it));
 
     for (int p = 0; p < depth; p++) {

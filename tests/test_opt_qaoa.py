@@ -7,6 +7,8 @@ from fastqaoa.indicator import get_indicator_interpolator, interpolate_diagonals
 import warnings
 import qubovert as qv
 
+from fastqaoa.ctypes.lib import NP_REAL
+
 import networkx as nx
 
 with warnings.catch_warnings():
@@ -116,7 +118,6 @@ def test_opt_qaoa_min_vertex_cover2():
     for _ in range(10):
         (tbetas, tgammas), _ = opt.step_and_cost(circuit, tbetas, tgammas)
     cost = circuit(tbetas, tgammas)
-    print(cost)
 
     # replica of the hamiltonian:
     puso = qv.PUSO(
@@ -145,9 +146,13 @@ def test_opt_qaoa_min_vertex_cover2():
     b = np.abs(qaoa(dg, betas, gammas).to_numpy()) ** 2
     cost2 = b.dot(dg.to_numpy())
 
-    assert np.isclose(cost, cost2)
-    assert np.allclose(tbetas, betas)
-    assert np.allclose(tgammas, gammas)
+    atol = 1e-8
+    if NP_REAL == np.float32:
+        atol = 1e-6
+
+    assert np.isclose(cost, cost2, atol=atol)
+    assert np.allclose(tbetas, betas, atol=atol)
+    assert np.allclose(tgammas, gammas, atol=atol)
 
 
 def test_opt_qpe_qaoa():
@@ -175,7 +180,7 @@ def test_opt_qpe_qaoa():
     sv, _ = qpe_qaoa(fs, constr, betas, gammas)
     assert cd.dot(np.abs(sv.to_numpy()) ** 2) < obj
 
-def test_opt_qpe_qaoa():
+def test_opt_qpe_qaoa_lbfgs():
     N = 4
     M = 4
 
@@ -197,5 +202,6 @@ def test_opt_qpe_qaoa():
     sv, _ = qpe_qaoa(fs, constr, betas, gammas)
     obj = cd.dot(np.abs(sv.to_numpy()) ** 2)
     _, betas, gammas = optimize_qaoa_lbfgs(fs, cs, betas, gammas, constr=constr)
+
     sv, _ = qpe_qaoa(fs, constr, betas, gammas)
     assert cd.dot(np.abs(sv.to_numpy()) ** 2) < obj

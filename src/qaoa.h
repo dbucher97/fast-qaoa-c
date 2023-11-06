@@ -6,7 +6,7 @@
 #define _QAOA
 
 inline void sum_x_prod(const statevector_t *sv_left,
-                       const statevector_t *sv_right, double *res) {
+                       const statevector_t *sv_right, real *res) {
   *res = 0;
   for (size_t i = 0; i < 1 << sv_left->n_qubits; i++) {
     cmplx s = 0;
@@ -18,25 +18,25 @@ inline void sum_x_prod(const statevector_t *sv_left,
 }
 
 void apply_diagonals(statevector_t *sv, const diagonals_t *dg,
-                     const double gamma);
-void apply_rx(statevector_t *sv, const double beta);
+                     const real gamma);
+void apply_rx(statevector_t *sv, const real beta);
 
 void qaoa_inner(statevector_t *sv, frx_plan_t *plan, const int depth,
-                const diagonals_t *dg, const double *betas,
-                const double *gammas);
+                const diagonals_t *dg, const real *betas,
+                const real *gammas);
 
-statevector_t *qaoa(const int depth, const diagonals_t *dg, const double *betas,
-                    const double *gammas);
+statevector_t *qaoa(const int depth, const diagonals_t *dg, const real *betas,
+                    const real *gammas);
 
 void grad_qaoa_inner(statevector_t *sv_left, statevector_t *sv_right,
                      frx_plan_t *plan, const int depth, const diagonals_t *dg,
-                     const diagonals_t *cost, const double *betas,
-                     const double *gammas, double *beta_gradients,
-                     double *gamma_gradients, double *expectation_value);
+                     const diagonals_t *cost, const real *betas,
+                     const real *gammas, real *beta_gradients,
+                     real *gamma_gradients, real *expectation_value);
 
-double grad_qaoa(const int depth, const diagonals_t *dg,
-                 const diagonals_t *cost, const double *betas,
-                 const double *gammas, double *beta_gradients,
-                 double *gamma_gradients);
+real grad_qaoa(const int depth, const diagonals_t *dg,
+                 const diagonals_t *cost, const real *betas,
+                 const real *gammas, real *beta_gradients,
+                 real *gamma_gradients);
 
 #endif

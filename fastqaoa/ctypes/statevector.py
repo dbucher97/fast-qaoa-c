@@ -1,14 +1,13 @@
-import ctypes as C
-from .cmplx import c_double_complex
+from .cmplx import c_complex
 from numpy.ctypeslib import ndpointer
 import numpy as np
 
-from .lib import _lib
+from .lib import _lib, C, NP_COMPLEX
 
 class Statevector(C.Structure):
     _fields_ = [
         ("n_qubits", C.c_uint8),
-        ("data", C.POINTER(c_double_complex)),
+        ("data", C.POINTER(c_complex)),
     ]
 
     def make_plus_state(n_qubits: int) -> "Statevector":
@@ -46,21 +45,22 @@ def __sv_del(self):
     return _lib.sv_free(self)
 Statevector.__del__ = __sv_del
 
-_lib.sv_copy.argtypes = [C.POINTER(Statevector), ndpointer(np.complex128)]
+_lib.sv_copy.argtypes = [C.POINTER(Statevector), ndpointer(NP_COMPLEX)]
 _lib.sv_copy.restype = None
 
 def __to_numpy(self):
-    res = np.empty(1 << self.n_qubits, dtype=np.complex128)
+    res = np.empty(1 << self.n_qubits, dtype=NP_COMPLEX)
     _lib.sv_copy(self, res)
     return res
 Statevector.to_numpy = __to_numpy
 
-_lib.sv_copy_from.argtypes = [ndpointer(np.complex128), C.c_uint8]
+_lib.sv_copy_from.argtypes = [ndpointer(NP_COMPLEX), C.c_uint8]
 _lib.sv_copy_from.restype = C.POINTER(Statevector)
 
 def __from_numpy(arr):
     n_qubits = int(np.log2(arr.shape[0]))
     assert 1 << n_qubits == arr.shape[0], "Not a valid statevector dimension"
+    arr = arr.astype(NP_COMPLEX)
     return _lib.sv_copy_from(arr, n_qubits).contents
 
 Statevector.from_numpy = __from_numpy

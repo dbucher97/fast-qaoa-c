@@ -134,7 +134,7 @@ static void apply_bf_rdx8(frx_plan_t *plan, statevector_t *sv) {
 }
 #undef dat
 
-void frx_apply(frx_plan_t *plan, statevector_t *sv, double beta) {
+void frx_apply(frx_plan_t *plan, statevector_t *sv, real beta) {
   plan->s = sin(beta);
   plan->c = cos(beta);
   if (plan->max_butterfly >= RDX4) {

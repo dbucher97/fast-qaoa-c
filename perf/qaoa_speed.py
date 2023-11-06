@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 import numpy as np
 
-depth = 1
+depth = 6
 
 betas = np.ones(depth) * 0.1
 gammas = np.ones(depth) * 0.1
@@ -21,7 +21,7 @@ for i in Ns:
     dg = Diagonals.from_numpy(x)
 
     a = time.perf_counter()
-    optimize_qaoa_lbfgs(dg, dg, betas, gammas)
+    qaoa(dg, betas, gammas)
     delta = time.perf_counter() - a
     delta *= 1e3
 

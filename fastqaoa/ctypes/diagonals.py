@@ -1,19 +1,18 @@
 from typing import List
-import ctypes as C
 from numpy.ctypeslib import ndpointer
 import numpy as np
 import qubovert as qv
 from functools import partial
 
-from .lib import _lib
+from .lib import _lib, C, NP_REAL
 
 
 class Diagonals(C.Structure):
     _fields_ = [
         ("n_qubits", C.c_uint8),
-        ("data", C.POINTER(C.c_double)),
-        ("min_val", C.c_double),
-        ("max_val", C.c_double),
+        ("data", C.POINTER(C.m_real)),
+        ("min_val", C.m_real),
+        ("max_val", C.m_real),
     ]
 
     LTE = 0
@@ -134,26 +133,26 @@ def __dg_del(self):
 
 Diagonals.__del__ = __dg_del
 
-_lib.dg_copy.argtypes = [C.POINTER(Diagonals), ndpointer(np.float64)]
+_lib.dg_copy.argtypes = [C.POINTER(Diagonals), ndpointer(NP_REAL)]
 _lib.dg_copy.restype = None
 
 
 def __to_numpy(self):
-    res = np.empty(1 << self.n_qubits, dtype=np.float64)
+    res = np.empty(1 << self.n_qubits, dtype=NP_REAL)
     _lib.dg_copy(self, res)
     return res
 
 
 Diagonals.to_numpy = __to_numpy
 
-_lib.dg_copy_from.argtypes = [ndpointer(np.float64), C.c_uint8]
+_lib.dg_copy_from.argtypes = [ndpointer(NP_REAL), C.c_uint8]
 _lib.dg_copy_from.restype = C.POINTER(Diagonals)
 
 
 def __from_numpy(arr):
     n_qubits = int(np.log2(arr.shape[0]))
     assert 1 << n_qubits == arr.shape[0], "Not a valid diagonals dimension"
-    arr = arr.astype(np.float64)
+    arr = arr.astype(NP_REAL)
     return _lib.dg_copy_from(arr, n_qubits).contents
 
 
@@ -163,14 +162,14 @@ _lib.dg_brute_force.argtypes = [
     C.c_uint8,
     C.c_int,
     ndpointer(np.uint64),
-    ndpointer(np.float64),
+    ndpointer(NP_REAL),
 ]
 _lib.dg_brute_force.restype = C.POINTER(Diagonals)
 
 
 def __brute_force(n_qubits, keys, vals):
     keys = np.array(keys).astype(np.uint64)
-    vals = np.array(vals).astype(np.float64)
+    vals = np.array(vals).astype(NP_REAL)
     assert vals.shape[0] == keys.shape[0], "Keys and vals need to match in dimension"
     return _lib.dg_brute_force(n_qubits, keys.shape[0], keys, vals).contents
 
@@ -180,9 +179,9 @@ Diagonals.brute_force = __brute_force
 _lib.dg_mask.argtypes = [
     C.POINTER(Diagonals),
     C.POINTER(Diagonals),
-    C.c_double,
+    C.m_real,
     C.c_int,
-    C.c_double,
+    C.m_real,
 ]
 _lib.dg_mask.restype = C.POINTER(Diagonals)
 
@@ -197,25 +196,25 @@ Diagonals.mask = __mask
 _lib.dg_quad_penalty.argtypes = [
     C.POINTER(Diagonals),
     C.POINTER(Diagonals),
-    C.c_double,
+    C.m_real,
     C.c_int,
-    C.POINTER(C.c_double),
+    C.POINTER(C.m_real),
 ]
 _lib.dg_quad_penalty.restype = C.POINTER(Diagonals)
 
 
 def __quad_peanlty(self, lhs, rhs, typ, penalty=None):
     if penalty is None:
-        penalty = C.c_double(-1)
+        penalty = C.m_real(-1)
     else:
-        penalty = C.c_double(penalty)
+        penalty = C.m_real(penalty)
     res = _lib.dg_quad_penalty(self, lhs, rhs, typ, penalty).contents
     return res, penalty.value
 
 
 Diagonals.quad_penalty = __quad_peanlty
 
-_lib.dg_cmp.argtypes = [C.POINTER(Diagonals), C.c_double, C.c_int]
+_lib.dg_cmp.argtypes = [C.POINTER(Diagonals), C.m_real, C.c_int]
 _lib.dg_cmp.restype = C.POINTER(Diagonals)
 
 
@@ -231,10 +230,10 @@ Diagonals.__eq__ = lambda self, other: __cmp(self, other, Diagonals.EQ)
 Diagonals.__ne__ = lambda self, other: __cmp(self, other, Diagonals.NEQ)
 
 
-_lib.dg_scale.argtypes = [C.POINTER(Diagonals), C.c_double]
+_lib.dg_scale.argtypes = [C.POINTER(Diagonals), C.m_real]
 _lib.dg_scale.restype = None
 
-_lib.dg_shift.argtypes = [C.POINTER(Diagonals), C.c_double]
+_lib.dg_shift.argtypes = [C.POINTER(Diagonals), C.m_real]
 _lib.dg_shift.restype = None
 
 _lib.dg_clone.argtypes = [C.POINTER(Diagonals)]

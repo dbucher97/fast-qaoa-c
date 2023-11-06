@@ -7,9 +7,9 @@
 
 void apply_qpe_diagonals_normalized(statevector_t *sv, const diagonals_t *dg,
                                     const diagonals_t *constr,
-                                    const double gamma, double *psum) {
+                                    const real gamma, real *psum) {
   cmplx buf;
-  double norm;
+  real norm;
   *psum = 0;
   for (size_t i = 0; i < 1 << sv->n_qubits; i++) {
     buf = 0.5 * cexp(-I * dg->data[i] * gamma);
@@ -23,7 +23,7 @@ void apply_qpe_diagonals_normalized(statevector_t *sv, const diagonals_t *dg,
 }
 
 void apply_qpe_diagonals(statevector_t *sv, const diagonals_t *dg,
-                         const diagonals_t *constr, const double gamma) {
+                         const diagonals_t *constr, const real gamma) {
   cmplx buf;
   for (size_t i = 0; i < 1 << sv->n_qubits; i++) {
     buf = 0.5 * cexp(-I * dg->data[i] * gamma);
@@ -33,14 +33,14 @@ void apply_qpe_diagonals(statevector_t *sv, const diagonals_t *dg,
 
 void qpe_qaoa_inner_normalized(statevector_t *sv, frx_plan_t *plan,
                                const int depth, const diagonals_t *dg,
-                               const diagonals_t *constr, double *betas,
-                               double *gammas, double *psucc) {
+                               const diagonals_t *constr, real *betas,
+                               real *gammas, real *psucc) {
   cmplx val = 1 / sqrt(1 << sv->n_qubits);
   for (size_t i = 0; i < 1 << sv->n_qubits; i++) {
     sv->data[i] = val;
   }
 
-  double p_it = 0.;
+  real p_it = 0.;
   *psucc = 1.;
   for (int p = 0; p < depth; p++) {
     apply_qpe_diagonals_normalized(sv, dg, constr, gammas[p], &p_it);
@@ -51,7 +51,7 @@ void qpe_qaoa_inner_normalized(statevector_t *sv, frx_plan_t *plan,
 
 void qpe_qaoa_inner(statevector_t *sv, frx_plan_t *plan, const int depth,
                     const diagonals_t *dg, const diagonals_t *constr,
-                    const double *betas, const double *gammas, double *psucc) {
+                    const real *betas, const real *gammas, real *psucc) {
   cmplx val = 1 / sqrt(1 << sv->n_qubits);
   for (size_t i = 0; i < 1 << sv->n_qubits; i++) {
     sv->data[i] = val;
@@ -66,8 +66,8 @@ void qpe_qaoa_inner(statevector_t *sv, frx_plan_t *plan, const int depth,
 }
 
 statevector_t *qpe_qaoa(const int depth, const diagonals_t *dg,
-                        const diagonals_t *constr, double *betas,
-                        const double *gammas, double *psucc) {
+                        const diagonals_t *constr, real *betas,
+                        const real *gammas, real *psucc) {
   statevector_t *sv = sv_malloc(dg->n_qubits);
   frx_plan_t *plan = frx_make_plan(sv, RDX4);
 
@@ -80,12 +80,12 @@ statevector_t *qpe_qaoa(const int depth, const diagonals_t *dg,
 void grad_qpe_qaoa_inner(statevector_t *sv_left, statevector_t *sv_right,
                          statevector_t *sv_left_p, frx_plan_t *plan, int depth,
                          const diagonals_t *dg, const diagonals_t *cost,
-                         const diagonals_t *constr, const double *betas,
-                         const double *gammas, double *beta_gradients,
-                         double *gamma_gradients, double *psucc,
-                         double *expectation_value) {
+                         const diagonals_t *constr, const real *betas,
+                         const real *gammas, real *beta_gradients,
+                         real *gamma_gradients, real *psucc,
+                         real *expectation_value) {
   cmplx buf, gg_buf, dg_buf, dg_factor, right_appl, derivative_dg_factor;
-  double dbuf;
+  real dbuf;
 
   qpe_qaoa_inner(sv_left, plan, depth, dg, constr, betas, gammas, psucc);
   sv_copy(sv_left, sv_right->data);
@@ -128,10 +128,10 @@ void grad_qpe_qaoa_inner(statevector_t *sv_left, statevector_t *sv_right,
 }
 
 void grad_qpe_qaoa(int depth, const diagonals_t *dg, const diagonals_t *cost,
-                   const diagonals_t *constr, const double *betas,
-                   const double *gammas, double *beta_gradients,
-                   double *gamma_gradients, double *psucc,
-                   double *expectation_value) {
+                   const diagonals_t *constr, const real *betas,
+                   const real *gammas, real *beta_gradients,
+                   real *gamma_gradients, real *psucc,
+                   real *expectation_value) {
   statevector_t *sv_left = sv_malloc(dg->n_qubits);
   statevector_t *sv_right = sv_malloc(dg->n_qubits);
   statevector_t *sv_left_p = sv_malloc(dg->n_qubits);

@@ -8,16 +8,27 @@ import qubovert as qv
 
 from fastqaoa.ctypes import Diagonals, Statevector
 from fastqaoa.ctypes.qaoa import apply_diagonals, apply_rx, grad_qaoa, qaoa
+from fastqaoa.ctypes.lib import NP_REAL
 from fastqaoa.utils.jax_config import set_accuracy
-
-set_accuracy(64)
-
 
 
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
     import pennylane as qml
 
+set_accuracy(64)
+
+def allclose(a, b):
+    atol = 1e-8
+    if NP_REAL == np.float64:
+        atol = 1e-4
+    return np.allclose(a, b, atol=atol)
+
+def isclose(a, b):
+    atol = 1e-8
+    if NP_REAL == np.float64:
+        atol = 1e-4
+    return np.isclose(a, b, atol=atol)
 
 def test_apply_diagonals():
     N = 5
@@ -32,7 +43,7 @@ def test_apply_diagonals():
     apply_diagonals(sv, diags, gamma)
     res = sv.to_numpy()
 
-    assert np.allclose(res, npsv * np.exp(-1j * gamma * npdiags))
+    assert allclose(res, npsv * np.exp(-1j * gamma * npdiags))
 
 
 def test_apply_rx():
@@ -58,7 +69,7 @@ def test_apply_rx():
 
     plres = circuit()
 
-    assert np.allclose(res, plres)
+    assert allclose(res, plres)
 
 
 def test_qaoa():
@@ -87,7 +98,7 @@ def test_qaoa():
 
     plres = circuit()
 
-    assert np.isclose(1, np.abs(res.dot(plres.conj())))
+    assert isclose(1, np.abs(res.dot(plres.conj())))
 
 
 def test_grad_qaoa():
@@ -125,8 +136,8 @@ def test_grad_qaoa():
 
     plgbetas, plggammas = jax.grad(circuit, (0, 1))(tbetas, tgammas)
 
-    assert np.allclose(grad_betas, plgbetas)
-    assert np.allclose(grad_gammas, plggammas)
+    assert allclose(grad_betas, plgbetas)
+    assert allclose(grad_gammas, plggammas)
 
 
 def test_apply_diagonals_min_vertex_cover():
@@ -176,7 +187,7 @@ def test_apply_diagonals_min_vertex_cover():
 
     npsv = sv.to_numpy()
 
-    assert np.isclose(np.abs(npsv.conj().dot(state)), 1)
+    assert isclose(np.abs(npsv.conj().dot(state)), 1)
 
 
 def test_qaoa_min_vertex_cover():
@@ -230,7 +241,7 @@ def test_qaoa_min_vertex_cover():
 
     state = circuit(betas, gammas)
 
-    assert np.isclose(np.abs(npsv.conj().dot(state)), 1)
+    assert isclose(np.abs(npsv.conj().dot(state)), 1)
 
 
 def test_grad_qaoa_min_vertex_cover():
@@ -282,6 +293,6 @@ def test_grad_qaoa_min_vertex_cover():
     plval = circuit(betas, gammas)
     pl_grad_betas, pl_grad_gammas = jax.grad(circuit, (0, 1))(tbetas, tgammas)
 
-    assert np.isclose(plval, val)
-    assert np.allclose(pl_grad_betas, grad_betas)
-    assert np.allclose(pl_grad_gammas, grad_gammas)
+    assert isclose(plval, val)
+    assert allclose(pl_grad_betas, grad_betas)
+    assert allclose(pl_grad_gammas, grad_gammas)

@@ -27,7 +27,7 @@
 
 diagonals_t *dg_malloc(uint8_t n_qubits) {
   diagonals_t *dg = (diagonals_t *)malloc(sizeof(diagonals_t));
-  dg->data = (double *)malloc((1 << n_qubits) * sizeof(double));
+  dg->data = (real *)malloc((1 << n_qubits) * sizeof(real));
   dg->n_qubits = n_qubits;
   dg->min_val = INFINITY;
   dg->max_val = -INFINITY;
@@ -47,13 +47,13 @@ diagonals_t *dg_clone(const diagonals_t *dg) {
   return other;
 }
 
-void dg_copy(const diagonals_t *dg, double *other) {
+void dg_copy(const diagonals_t *dg, real *other) {
   for (size_t i = 0; i < 1 << dg->n_qubits; i++) {
     other[i] = dg->data[i];
   }
 }
 
-diagonals_t *dg_copy_from(const double *other, const uint8_t n_qubits) {
+diagonals_t *dg_copy_from(const real *other, const uint8_t n_qubits) {
   diagonals_t *dg = dg_malloc(n_qubits);
 
   for (size_t i = 0; i < 1 << dg->n_qubits; i++) {
@@ -76,10 +76,10 @@ void dg_print(const diagonals_t *dg) {
 }
 
 diagonals_t *dg_brute_force(uint8_t n_qubits, int polylen, uint64_t *polykeys,
-                            double *polyvals) {
+                            real *polyvals) {
   diagonals_t *dg = dg_malloc(n_qubits);
   for (uint64_t i = 0; i < 1 << n_qubits; i++) {
-    double buf = 0.;
+    real buf = 0.;
     for (int j = 0; j < polylen; j++) {
       buf += ((i & polykeys[j]) == polykeys[j]) * polyvals[j];
     }
@@ -90,12 +90,12 @@ diagonals_t *dg_brute_force(uint8_t n_qubits, int polylen, uint64_t *polykeys,
   return dg;
 }
 
-diagonals_t *dg_mask(diagonals_t *dg, diagonals_t *lhs, double rhs,
-                     cmp_kind cmp, double val) {
+diagonals_t *dg_mask(diagonals_t *dg, diagonals_t *lhs, real rhs,
+                     cmp_kind cmp, real val) {
   diagonals_t *ret = dg_malloc(dg->n_qubits);
 
   bool cmp_ok;
-  double diff;
+  real diff;
   for (size_t i = 0; i < 1 << dg->n_qubits; i++) {
     NOT_FEASIBLE
     if (cmp_ok) {
@@ -110,16 +110,16 @@ diagonals_t *dg_mask(diagonals_t *dg, diagonals_t *lhs, double rhs,
   return ret;
 }
 
-diagonals_t *dg_quad_penalty(diagonals_t *dg, diagonals_t *lhs, double rhs,
-                             cmp_kind cmp, double *penalty) {
+diagonals_t *dg_quad_penalty(diagonals_t *dg, diagonals_t *lhs, real rhs,
+                             cmp_kind cmp, real *penalty) {
   diagonals_t *ret = dg_clone(dg);
-  double diff;
+  real diff;
   bool cmp_ok;
 
   // auto penalty
   if (*penalty < 0) {
-    double scnd_min_val = INFINITY;
-    double min_val = INFINITY;
+    real scnd_min_val = INFINITY;
+    real min_val = INFINITY;
     for (size_t i = 0; i < 1 << dg->n_qubits; i++) {
       FEASIBLE
       if (cmp_ok) {
@@ -136,7 +136,7 @@ diagonals_t *dg_quad_penalty(diagonals_t *dg, diagonals_t *lhs, double rhs,
       scnd_min_val = 0;
 
     *penalty = 0.;
-    double new_penalty = 0;
+    real new_penalty = 0;
     for (size_t i = 0; i < 1 << dg->n_qubits; i++) {
       NOT_FEASIBLE
       if (cmp_ok) {
@@ -161,27 +161,27 @@ diagonals_t *dg_quad_penalty(diagonals_t *dg, diagonals_t *lhs, double rhs,
   return ret;
 }
 
-diagonals_t *dg_cmp(diagonals_t *lhs, double rhs, cmp_kind cmp) {
+diagonals_t *dg_cmp(diagonals_t *lhs, real rhs, cmp_kind cmp) {
   diagonals_t *ret = dg_malloc(lhs->n_qubits);
   ret->min_val = 0.;
   ret->max_val = 1.;
 
-  double diff;
+  real diff;
   bool cmp_ok;
   for (size_t i = 0; i < 1 << lhs->n_qubits; i++) {
     FEASIBLE
-    ret->data[i] = (double)cmp_ok;
+    ret->data[i] = (real)cmp_ok;
   }
 
   return ret;
 }
 
-void dg_scale(diagonals_t *diags, double f) {
+void dg_scale(diagonals_t *diags, real f) {
   for (size_t i = 0; i < 1 << diags->n_qubits; i++) {
     diags->data[i] *= f;
   }
   if (f < 0) {
-    double mv = diags->max_val;
+    real mv = diags->max_val;
     diags->max_val = f * diags->min_val;
     diags->min_val = f * mv;
   } else {
@@ -190,7 +190,7 @@ void dg_scale(diagonals_t *diags, double f) {
   }
 }
 
-void dg_shift(diagonals_t *diags, double f) {
+void dg_shift(diagonals_t *diags, real f) {
   for (size_t i = 0; i < 1 << diags->n_qubits; i++) {
     diags->data[i] += f;
   }
