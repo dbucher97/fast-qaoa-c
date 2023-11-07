@@ -1,5 +1,6 @@
 #include "qaoa.h"
 #include "frx.h"
+#include "mmath.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,7 +8,7 @@
 void apply_diagonals(statevector_t *sv, const diagonals_t *dg,
                      const real gamma) {
   for (size_t i = 0; i < 1 << sv->n_qubits; i++) {
-    sv->data[i] *= cos(dg->data[i] * gamma) - I * sin(dg->data[i] * gamma);
+    sv->data[i] *= COS(dg->data[i] * gamma) - I * SIN(dg->data[i] * gamma);
   }
 }
 

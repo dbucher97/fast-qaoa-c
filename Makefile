@@ -4,7 +4,7 @@ SRC_DIR = ./src
 BUILD_DIR = ./build
 
 
-CFLAGS ?= -I$(INC_DIR) -O3 -march=native
+CFLAGS ?= -I$(INC_DIR) -O2 -march=native -mtune=native
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
