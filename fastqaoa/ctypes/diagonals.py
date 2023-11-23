@@ -97,21 +97,24 @@ class Diagonals(C.Structure):
     def __imul__(self, other: float) -> "Diagonals": # pyright: ignore
         ...
 
-    # def __mul__(self, other: float):
-    #     x = self.clone()
-    #     x *= other
-    #     return x
-    #
-    # def __add__(self, other: float):
-    #     x = self.clone()
-    #     x += other
-    #     return x
-    #
-    # def __rmul__(self, other: float):
-    #     return self.__mul__(other)
-    #
-    # def __radd__(self, other: float):
-    #     return self.__add__(other)
+    def __mul__(self, other: float):
+        x = self.clone()
+        x *= other
+        return x
+
+    def __add__(self, other: float):
+        x = self.clone()
+        x += other
+        return x
+
+    def __rmul__(self, other: float):
+        return self.__mul__(other)
+
+    def __radd__(self, other: float):
+        return self.__add__(other)
+
+    def __truediv__(self, other: float):
+        return self.__mul__(1 / other)
 
 _lib.dg_print.argtypes = [C.POINTER(Diagonals)]
 _lib.dg_print.restype = None

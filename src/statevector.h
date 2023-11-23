@@ -28,8 +28,10 @@ void sv_print(const statevector_t *sv);
 real sv_normalize(statevector_t *sv);
 
 inline void sv_mult(statevector_t *sv, const diagonals_t *dg) {
+  size_t cidx = 0;
   for (size_t i = 0; i < 1 << sv->n_qubits; i++) {
-    sv->data[i] *= dg->data[i];
+    cidx = i % (1 << dg->n_qubits);
+    sv->data[i] *= dg->data[cidx];
   }
 }
 
@@ -43,7 +45,9 @@ inline void sv_dot(const statevector_t *sv1, const statevector_t *sv2, cmplx* re
 inline void sv_expec(const statevector_t *sv1, const statevector_t *sv2,
                       const diagonals_t *dg, cmplx* res) {
   *res = 0;
+  size_t cidx = 0;
   for (size_t i = 0; i < 1 << sv1->n_qubits; i++) {
+    cidx = i % (1 << dg->n_qubits);
     *res += conj(sv1->data[i]) * sv2->data[i] * dg->data[i];
   }
 }

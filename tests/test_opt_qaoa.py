@@ -21,14 +21,14 @@ def test_opt_qaoa_min_vertex_cover():
     # replica of the hamiltonian
     puso = qv.PUSO(
         {
-            (0,): 0.5,
-            (1,): 0.5,
-            (2,): 1.25,
-            (3,): -0.25,
-            (0, 1): 0.75,
-            (0, 2): 0.75,
-            (1, 2): 0.75,
-            (2, 3): 0.75,
+            (0,): -0.5,
+            (1,): -0.5,
+            (2,): -1.25,
+            (3,): 0.25,
+            (0, 1): -0.75,
+            (0, 2): -0.75,
+            (1, 2): -0.75,
+            (2, 3): -0.75,
         }
     )
 
@@ -46,9 +46,9 @@ def test_opt_qaoa_min_vertex_cover():
     a = np.abs(qaoa(dg, betas, gammas).to_numpy()) ** 2
     a = a.dot(dg.to_numpy())
 
-    betas, gammas = optimize_qaoa_adam(dg, dg, betas, gammas)
+    res = optimize_qaoa_adam(dg, dg, betas, gammas)
 
-    b = np.abs(qaoa(dg, betas, gammas).to_numpy()) ** 2
+    b = np.abs(qaoa(dg, res.betas, res.gammas).to_numpy()) ** 2
     b = b.dot(dg.to_numpy())
 
     assert b < a
@@ -57,14 +57,14 @@ def test_lbfgs_qaoa_min_vertex_cover():
     # replica of the hamiltonian
     puso = qv.PUSO(
         {
-            (0,): 0.5,
-            (1,): 0.5,
-            (2,): 1.25,
-            (3,): -0.25,
-            (0, 1): 0.75,
-            (0, 2): 0.75,
-            (1, 2): 0.75,
-            (2, 3): 0.75,
+            (0,): -0.5,
+            (1,): -0.5,
+            (2,): -1.25,
+            (3,): 0.25,
+            (0, 1): -0.75,
+            (0, 2): -0.75,
+            (1, 2): -0.75,
+            (2, 3): -0.75,
         }
     )
 
@@ -82,7 +82,9 @@ def test_lbfgs_qaoa_min_vertex_cover():
     a = np.abs(qaoa(dg, betas, gammas).to_numpy()) ** 2
     a = a.dot(dg.to_numpy())
 
-    _, betas, gammas = optimize_qaoa_lbfgs(dg, dg, betas, gammas, maxiter=10)
+    res = optimize_qaoa_lbfgs(dg, dg, betas, gammas, maxiter=10)
+    betas = res.betas
+    gammas = res.gammas
 
     b = np.abs(qaoa(dg, betas, gammas).to_numpy()) ** 2
     b = b.dot(dg.to_numpy())
@@ -113,7 +115,7 @@ def test_opt_qaoa_min_vertex_cover2():
             qml.qaoa.mixer_layer(beta, mixer_h)
         return qml.expval(cost_h)
 
-    opt = qml.AdamOptimizer()
+    opt = qml.AdamOptimizer(beta2=0.999)
 
     for _ in range(10):
         (tbetas, tgammas), _ = opt.step_and_cost(circuit, tbetas, tgammas)
@@ -122,14 +124,14 @@ def test_opt_qaoa_min_vertex_cover2():
     # replica of the hamiltonian:
     puso = qv.PUSO(
         {
-            (0,): 0.5,
-            (1,): 0.5,
-            (2,): 1.25,
-            (3,): -0.25,
-            (0, 1): 0.75,
-            (0, 2): 0.75,
-            (1, 2): 0.75,
-            (2, 3): 0.75,
+            (0,): -0.5,
+            (1,): -0.5,
+            (2,): -1.25,
+            (3,): 0.25,
+            (0, 1): -0.75,
+            (0, 2): -0.75,
+            (1, 2): -0.75,
+            (2, 3): -0.75,
         }
     )
 
@@ -141,9 +143,9 @@ def test_opt_qaoa_min_vertex_cover2():
 
     dg = Diagonals.brute_force(4, keys, vals)
 
-    betas, gammas = optimize_qaoa_adam(dg, dg, betas, gammas, maxiter=10)
+    res = optimize_qaoa_adam(dg, dg, betas, gammas, maxiter=10)
 
-    b = np.abs(qaoa(dg, betas, gammas).to_numpy()) ** 2
+    b = np.abs(qaoa(dg, res.betas, res.gammas).to_numpy()) ** 2
     cost2 = b.dot(dg.to_numpy())
 
     atol = 1e-8
@@ -151,8 +153,8 @@ def test_opt_qaoa_min_vertex_cover2():
         atol = 1e-6
 
     assert np.isclose(cost, cost2, atol=atol)
-    assert np.allclose(tbetas, betas, atol=atol)
-    assert np.allclose(tgammas, gammas, atol=atol)
+    assert np.allclose(tbetas, res.betas, atol=atol)
+    assert np.allclose(tgammas, res.gammas, atol=atol)
 
 
 def test_opt_qpe_qaoa():
@@ -176,8 +178,8 @@ def test_opt_qpe_qaoa():
 
     sv, _ = qpe_qaoa(fs, constr, betas, gammas)
     obj = cd.dot(np.abs(sv.to_numpy()) ** 2)
-    betas, gammas = optimize_qaoa_adam(fs, cs, betas, gammas, constr=constr, maxiter=100)
-    sv, _ = qpe_qaoa(fs, constr, betas, gammas)
+    res = optimize_qaoa_adam(fs, cs, betas, gammas, constr=constr, maxiter=100)
+    sv, _ = qpe_qaoa(fs, constr, res.betas, res.gammas)
     assert cd.dot(np.abs(sv.to_numpy()) ** 2) < obj
 
 def test_opt_qpe_qaoa_lbfgs():
@@ -201,7 +203,9 @@ def test_opt_qpe_qaoa_lbfgs():
 
     sv, _ = qpe_qaoa(fs, constr, betas, gammas)
     obj = cd.dot(np.abs(sv.to_numpy()) ** 2)
-    _, betas, gammas = optimize_qaoa_lbfgs(fs, cs, betas, gammas, constr=constr)
+    res = optimize_qaoa_lbfgs(fs, cs, betas, gammas, constr=constr)
+    betas = res.betas
+    gammas = res.gammas
 
     sv, _ = qpe_qaoa(fs, constr, betas, gammas)
     assert cd.dot(np.abs(sv.to_numpy()) ** 2) < obj

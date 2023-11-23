@@ -54,7 +54,7 @@ def construct_pennylane_circuit(dev, N, M, fs: Diagonals, gs: Diagonals):
         #
         qml.PauliX(M - 1)
         qml.ControlledQubitUnitary(
-            DiagonalQubitUnitary(jnp.exp(-1j * fd * gamma), wires=wires),
+            DiagonalQubitUnitary(jnp.exp(1j * fd * gamma), wires=wires),
             control_wires=[M - 1],
         )
         qml.PauliX(M - 1)

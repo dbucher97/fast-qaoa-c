@@ -14,7 +14,6 @@ else:
     C.m_real = C.c_double
     NP_REAL = np.float64
     NP_COMPLEX = np.complex128
-print(C.m_real)
 
 if platform == "linux":
     __ext = "so"

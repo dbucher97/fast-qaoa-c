@@ -22,8 +22,7 @@ void apply_diagonals(statevector_t *sv, const diagonals_t *dg,
 void apply_rx(statevector_t *sv, const real beta);
 
 void qaoa_inner(statevector_t *sv, frx_plan_t *plan, const int depth,
-                const diagonals_t *dg, const real *betas,
-                const real *gammas);
+                const diagonals_t *dg, const real *betas, const real *gammas);
 
 statevector_t *qaoa(const int depth, const diagonals_t *dg, const real *betas,
                     const real *gammas);
@@ -34,9 +33,15 @@ void grad_qaoa_inner(statevector_t *sv_left, statevector_t *sv_right,
                      const real *gammas, real *beta_gradients,
                      real *gamma_gradients, real *expectation_value);
 
-real grad_qaoa(const int depth, const diagonals_t *dg,
-                 const diagonals_t *cost, const real *betas,
-                 const real *gammas, real *beta_gradients,
-                 real *gamma_gradients);
+real grad_qaoa(const int depth, const diagonals_t *dg, const diagonals_t *cost,
+               const real *betas, const real *gammas, real *beta_gradients,
+               real *gamma_gradients);
+
+real energy(const int depth, const diagonals_t *dg, const diagonals_t *cost,
+            const real *betas, const real *gammas);
+
+void multi_energy(const int num, const int depth, const diagonals_t *dg,
+                  const diagonals_t *cost, const real *betas,
+                  const real *gammas, real *results);
 
 #endif

@@ -16,6 +16,13 @@ class IntegerKnapsack(Knapsack):
         return instance
 
     def quad_penalty_full_problem(self, penalty: float):
+        if penalty is None:
+            if not hasattr(self, "_penalty"):
+                self.quad_penalty_cost()
+
+        penalty = self._penalty
+
+
         n_ancilla = int(np.floor(np.log2(self.max_capacity) + 1))
         xs = [qv.boolean_var(i) for i in range(self.n_qubits)]
         ys = [qv.boolean_var(self.n_qubits + i) for i in range(n_ancilla)]

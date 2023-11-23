@@ -12,7 +12,7 @@ void apply_qpe_diagonals_normalized(statevector_t *sv, const diagonals_t *dg,
   real norm;
   *psum = 0;
   for (size_t i = 0; i < 1 << sv->n_qubits; i++) {
-    buf = 0.5 * cexp(-I * dg->data[i] * gamma);
+    buf = 0.5 * cexp(I * dg->data[i] * gamma);
     sv->data[i] *= (buf + 0.5) + (buf - 0.5) * constr->data[i];
     *psum += pow(creal(sv->data[i]), 2.) + pow(cimag(sv->data[i]), 2.);
   }
@@ -26,7 +26,7 @@ void apply_qpe_diagonals(statevector_t *sv, const diagonals_t *dg,
                          const diagonals_t *constr, const real gamma) {
   cmplx buf;
   for (size_t i = 0; i < 1 << sv->n_qubits; i++) {
-    buf = 0.5 * cexp(-I * dg->data[i] * gamma);
+    buf = 0.5 * cexp(I * dg->data[i] * gamma);
     sv->data[i] *= (buf + 0.5) + (buf - 0.5) * constr->data[i];
   }
 }
@@ -106,7 +106,7 @@ void grad_qpe_qaoa_inner(statevector_t *sv_left, statevector_t *sv_right,
 
     gg_buf = 0;
     for (size_t i = 0; i < 1 << sv_left->n_qubits; i++) {
-      dg_buf = 0.5 * cexp(-I * dg->data[i] * gammas[p]);
+      dg_buf = 0.5 * cexp(I * dg->data[i] * gammas[p]);
       dg_factor = (dg_buf + 0.5) + (dg_buf - 0.5) * constr->data[i];
 
       right_appl = sv_right->data[i] / dg_factor;
@@ -123,7 +123,7 @@ void grad_qpe_qaoa_inner(statevector_t *sv_left, statevector_t *sv_right,
       sv_left_p->data[i] *= conj(dg_factor);
     }
 
-    gamma_gradients[p] = 2 * cimag(gg_buf);
+    gamma_gradients[p] = -2. * cimag(gg_buf);
   }
 }
 

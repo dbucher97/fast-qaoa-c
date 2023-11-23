@@ -10,7 +10,7 @@
 #include <lbfgs.h>
 
 typedef struct {
-  int test;
+  int it;
   statevector_t *sv_left;
   statevector_t *sv_right;
   statevector_t *sv_left_p;
@@ -56,6 +56,7 @@ static lbfgsfloatval_t evaluate_qaoa(void *instance, const lbfgsfloatval_t *x,
   }
 #endif
 
+  qaoa_instance->it++;
   return (lbfgsfloatval_t)expectation_value;
 }
 
@@ -95,6 +96,7 @@ static lbfgsfloatval_t evaluate_qpe_qaoa(void *instance,
   }
 #endif
 
+  qaoa_instance->it++;
   return (lbfgsfloatval_t)expectation_value;
 }
 
@@ -110,12 +112,12 @@ static lbfgsfloatval_t evaluate_qpe_qaoa(void *instance,
 // }
 
 int opt_lbfgs_qaoa(int depth, const diagonals_t *dg, const diagonals_t *cost,
-                   real *betas, real *gammas, int max_iter) {
+                   real *betas, real *gammas, const int max_iter, int* it) {
   statevector_t *sv_left = sv_malloc(dg->n_qubits);
   statevector_t *sv_right = sv_malloc(dg->n_qubits);
   frx_plan_t *plan = frx_make_plan(sv_left, RDX4);
 
-  qaoa_instance_t instance = {3, sv_left, sv_right, NULL, plan, dg, cost, NULL};
+  qaoa_instance_t instance = {0, sv_left, sv_right, NULL, plan, dg, cost, NULL};
 #ifdef USE_FLOAT32
   instance.x = malloc(2 * depth * sizeof(float));
   instance.g = malloc(2 * depth * sizeof(float));
@@ -130,24 +132,21 @@ int opt_lbfgs_qaoa(int depth, const diagonals_t *dg, const diagonals_t *cost,
     printf("ERROR: Failed to allocate a memory block for variables.\n");
     return -1;
   }
-  printf("LFBGS allocated\n");
   for (int i = 0; i < depth; i++) {
     x[i] = betas[i];
     x[depth + i] = gammas[i];
   }
   lbfgs_parameter_init(&param);
   param.max_iterations = max_iter;
-  printf("LFBGS initialized\n");
 
-  printf("%p %p\n", &instance, instance.sv_left);
   int ret;
   ret = lbfgs(N, x, &fx, evaluate_qaoa, NULL, &instance, &param);
-  printf("LFBGS done\n");
 
   for (int i = 0; i < depth; i++) {
     betas[i] = x[i];
     gammas[i] = x[depth + i];
   }
+  *it = instance.it;
 
   lbfgs_free(x);
   sv_free(sv_left);
@@ -162,13 +161,13 @@ int opt_lbfgs_qaoa(int depth, const diagonals_t *dg, const diagonals_t *cost,
 
 int opt_lbfgs_qpe_qaoa(int depth, const diagonals_t *dg,
                        const diagonals_t *cost, const diagonals_t *constr,
-                       real *betas, real *gammas, int max_iter) {
+                       real *betas, real *gammas, const int max_iter, int* it) {
   statevector_t *sv_left = sv_malloc(dg->n_qubits);
   statevector_t *sv_right = sv_malloc(dg->n_qubits);
   statevector_t *sv_left_p = sv_malloc(dg->n_qubits);
   frx_plan_t *plan = frx_make_plan(sv_left, RDX4);
 
-  qaoa_instance_t instance = {3,    sv_left, sv_right, sv_left_p,
+  qaoa_instance_t instance = {0,    sv_left, sv_right, sv_left_p,
                               plan, dg,      cost,     constr};
 #ifdef USE_FLOAT32
   instance.x = malloc(2 * depth * sizeof(float));
@@ -198,6 +197,7 @@ int opt_lbfgs_qpe_qaoa(int depth, const diagonals_t *dg,
     betas[i] = x[i];
     gammas[i] = x[depth + i];
   }
+  *it = instance.it;
 
   lbfgs_free(x);
   sv_free(sv_left);

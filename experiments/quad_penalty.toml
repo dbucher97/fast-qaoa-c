@@ -1,0 +1,64 @@
+n_workers = 4
+######################################################################################
+# [int_quad_penalty]
+# problem = "IntegerKnapsack"
+# gamma_scale = 0.2
+# beta_scale= 0.2
+# sizes = [6, 8, 10, 12, 14]
+# instances = 64
+#
+# depths = [1, 2, 4, 8, 16]
+#
+# qaoa = [{ kind = "masked_cost"}, {kind = "quad_penalty_cost"}]
+#
+#
+# [[int_quad_penalty.qaoa]]
+# kind = "quad_penalty_cost"
+# settings = {penalty = -2}
+#
+# [[int_quad_penalty.qaoa]]
+# kind = "quad_penalty_cost"
+# settings = {penalty = 2}
+#
+# [[int_quad_penalty.qaoa]]
+# kind = "quad_penalty_cost"
+# settings = {penalty = 5}
+
+
+[int_qpfp]
+problem = "IntegerKnapsack"
+gamma_scale = 0.1
+beta_scale= 0.1
+# initial = "linear"
+# interpolate = false
+
+sizes = [6, 8]
+instances = 64
+depths = [1, 2, 4, 8, 16]
+
+qaoa = [
+    {kind = "masked_cost"},
+    {kind = "quad_penalty_cost"},
+    {kind = "quad_penalty_cost", cost = "masked_cost"},
+    {kind = "quad_penalty_full_problem"}
+    {kind = "quad_penalty_full_problem", cost = "masked_cost"}
+]
+
+[int_qpfp_lin]
+problem = "IntegerKnapsack"
+gamma_scale = 0.2
+beta_scale= 0.2
+initial = "linear"
+interpolate = false
+
+sizes = [6, 8]
+instances = 64
+depths = [1, 2, 4, 8, 16]
+
+qaoa = [
+    {kind = "masked_cost"},
+    {kind = "quad_penalty_cost"},
+    {kind = "quad_penalty_cost", cost = "masked_cost"},
+    {kind = "quad_penalty_full_problem"}
+    {kind = "quad_penalty_full_problem", cost = "masked_cost"}
+]

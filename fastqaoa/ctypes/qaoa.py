@@ -69,3 +69,45 @@ def grad_qaoa(
     val = _lib.grad_qaoa(len(betas), dg, cost, betas, gammas, grad_betas, grad_gammas)
     return val, grad_betas, grad_gammas
 
+
+_lib.energy.argtypes = [
+    C.c_int,
+    C.POINTER(Diagonals),
+    C.POINTER(Diagonals),
+    ndpointer(NP_REAL),
+    ndpointer(NP_REAL),
+]
+_lib.energy.restype = C.m_real
+
+
+def energy(
+    dg: Diagonals, cost: Diagonals, betas: List[float], gammas: List[float]
+) -> float:
+    gammas = np.array(gammas).astype(NP_REAL)
+    betas = np.array(betas).astype(NP_REAL)
+    assert len(gammas) == len(betas), "Betas and Gammas must have same size"
+    return _lib.energy(len(betas), dg, cost, betas, gammas)
+
+
+_lib.multi_energy.argtypes = [
+    C.c_int,
+    C.c_int,
+    C.POINTER(Diagonals),
+    C.POINTER(Diagonals),
+    ndpointer(NP_REAL),
+    ndpointer(NP_REAL),
+    ndpointer(NP_REAL),
+]
+_lib.multi_energy.restype = None
+
+
+def multi_energy(
+    dg: Diagonals, cost: Diagonals, betas: np.ndarray, gammas: np.ndarray
+) -> np.ndarray:
+    gammas = np.array(gammas).astype(NP_REAL)
+    betas = np.array(betas).astype(NP_REAL)
+    assert betas.shape == gammas.shape, "Betas and Gammas must have identical shape"
+    assert len(betas.shape) == 2, "Betas and Gammas must be two-dimensional"
+    res = np.empty(betas.shape[0], dtype=NP_REAL)
+    _lib.multi_energy(*betas.shape, dg, cost, betas, gammas, res)
+    return res

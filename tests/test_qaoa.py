@@ -43,7 +43,7 @@ def test_apply_diagonals():
     apply_diagonals(sv, diags, gamma)
     res = sv.to_numpy()
 
-    assert allclose(res, npsv * np.exp(-1j * gamma * npdiags))
+    assert allclose(res, npsv * np.exp(1j * gamma * npdiags))
 
 
 def test_apply_rx():
@@ -91,7 +91,7 @@ def test_qaoa():
         for i in range(N):
             qml.Hadamard(i)
         for beta, gamma in zip(betas, gammas):
-            qml.DiagonalQubitUnitary(np.exp(-1j * npdiags * gamma), wires=range(N))
+            qml.DiagonalQubitUnitary(np.exp(1j * npdiags * gamma), wires=range(N))
             for i in range(N):
                 qml.RX(2 * beta, wires=i)
         return qml.state()
@@ -125,7 +125,7 @@ def test_grad_qaoa():
         for i in range(N):
             qml.Hadamard(i)
         for beta, gamma in zip(betas, gammas):
-            qml.DiagonalQubitUnitary(jnp.exp(-1j * npdiags * gamma), wires=range(N))
+            qml.DiagonalQubitUnitary(jnp.exp(1j * npdiags * gamma), wires=range(N))
             for i in range(N):
                 qml.RX(2 * beta, wires=i)
         return qml.expval(qml.Hermitian(np.diag(npcost), wires=range(N)))
@@ -163,14 +163,14 @@ def test_apply_diagonals_min_vertex_cover():
     # replica of the hamiltonian
     puso = qv.PUSO(
         {
-            (0,): 0.5,
-            (1,): 0.5,
-            (2,): 1.25,
-            (3,): -0.25,
-            (0, 1): 0.75,
-            (0, 2): 0.75,
-            (1, 2): 0.75,
-            (2, 3): 0.75,
+            (0,): -0.5,
+            (1,): -0.5,
+            (2,): -1.25,
+            (3,): +0.25,
+            (0, 1): -0.75,
+            (0, 2): -0.75,
+            (1, 2): -0.75,
+            (2, 3): -0.75,
         }
     )
 
@@ -227,7 +227,6 @@ def test_qaoa_min_vertex_cover():
             (2, 3): 0.75,
         }
     )
-
     b = puso.to_pubo()
 
     b = {sum(1 << i for i in k) if len(k) > 0 else 0: v for k, v in b.items()}
@@ -280,6 +279,7 @@ def test_grad_qaoa_min_vertex_cover():
         }
     )
 
+
     b = puso.to_pubo()
 
     b = {sum(1 << i for i in k) if len(k) > 0 else 0: v for k, v in b.items()}
@@ -288,7 +288,7 @@ def test_grad_qaoa_min_vertex_cover():
 
     dg = Diagonals.brute_force(4, keys, vals)
 
-    val, grad_betas, grad_gammas = grad_qaoa(dg, dg, betas, gammas)
+    val, grad_betas, grad_gammas = grad_qaoa(-1 * dg, dg, betas, gammas)
 
     plval = circuit(betas, gammas)
     pl_grad_betas, pl_grad_gammas = jax.grad(circuit, (0, 1))(tbetas, tgammas)

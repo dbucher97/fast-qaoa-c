@@ -19,6 +19,8 @@ ipython = "^8.17.2"
 toml = "^0.10.2"
 pydantic = "^2.4.2"
 importlib-resources = "^6.1.0"
+tqdm = "^4.66.1"
+h5py = "^3.10.0"
 
 
 [tool.poetry.group.dev.dependencies]

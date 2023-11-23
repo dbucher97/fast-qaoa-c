@@ -48,12 +48,12 @@ class Knapsack(ProblemBase):
     def masked_cost(self):
         if hasattr(self, "_masked"):
             return self._masked
-        cost, constr = self.diagonalized
+        cost, constr = self.diagonalized()
         self._masked = cost.mask(constr, 0, Diagonals.GTE)
         return self._masked
 
-    def quad_penalty_cost(self, penalty=None):
-        cost, constr = self.diagonalized
+    def quad_penalty_cost(self, penalty: float = None):
+        cost, constr = self.diagonalized()
         if penalty is None and hasattr(self, "_penalty"):
             penalty = self._penalty
         diag, penalty = cost.quad_penalty(constr, 0, Diagonals.GTE, penalty=penalty)
@@ -64,12 +64,13 @@ class Knapsack(ProblemBase):
         if penalty is None:
             if not hasattr(self, "_penalty"):
                 self.quad_penalty_cost()
-            penalty = self._penalty
+
+        penalty = self._penalty
 
         xs = [qv.boolean_var(i) for i in range(self.n_qubits)]
         ys = [qv.boolean_var(self.n_qubits + i) for i in range(n_ancilla)]
-        step = self.max_capacity / (2 ** n_ancilla - 1)
-        yfacs = [step * 2 ** i for i in range(n_ancilla)]
+        step = self.max_capacity / (2**n_ancilla - 1)
+        yfacs = [step * 2**i for i in range(n_ancilla)]
 
         cost = sum(-c * x for c, x in zip(self.costs, xs))
         weights = sum(w * x for w, x in zip(self.weights, xs))
@@ -86,3 +87,5 @@ class Knapsack(ProblemBase):
             del self._cost
         if hasattr(self, "_constr"):
             del self._constr
+        if hasattr(self, "_penalty"):
+            del self._penalty
