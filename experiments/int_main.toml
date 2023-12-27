@@ -1,4 +1,4 @@
-n_workers = 30
+n_workers = 4
 
 [int_main]
 problem = "IntegerKnapsack"

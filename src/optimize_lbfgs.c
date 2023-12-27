@@ -189,6 +189,9 @@ int opt_lbfgs_qpe_qaoa(int depth, const diagonals_t *dg,
   }
   lbfgs_parameter_init(&param);
   param.max_iterations = max_iter;
+  param.m = 100;
+  param.epsilon = 1e-2;
+  param.linesearch = 2;
 
   int ret;
   ret = lbfgs(N, x, &fx, evaluate_qpe_qaoa, NULL, &instance, &param);

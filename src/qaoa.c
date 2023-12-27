@@ -167,10 +167,12 @@ void grad_qaoa_inner(statevector_t *sv_left, statevector_t *sv_right,
     sv_expec(sv_left, sv_right, dg, &buf);
     gamma_gradients[p] = -2. * cimag(buf);
 
-    for (size_t i = 0; i < 1 << sv_left->n_qubits; i++) {
-      buf = COS(dg->data[i] * gammas[p]) - I * SIN(dg->data[i] * gammas[p]);
-      sv_left->data[i] *= buf;
-      sv_right->data[i] *= buf;
+    if (p > 0) {
+      for (size_t i = 0; i < 1 << sv_left->n_qubits; i++) {
+        buf = COS(dg->data[i] * gammas[p]) - I * SIN(dg->data[i] * gammas[p]);
+        sv_left->data[i] *= buf;
+        sv_right->data[i] *= buf;
+      }
     }
   }
 }
@@ -207,9 +209,9 @@ void multi_energy(const int num, const int depth, const diagonals_t *dg,
   statevector_t *sv = sv_malloc(dg->n_qubits);
   frx_plan_t *plan = frx_make_plan(sv, RDX4);
   cmplx res;
-  const real* betait = betas;
-  const real* gammait = gammas;
-  for(int i = 0; i < num; i++) {
+  const real *betait = betas;
+  const real *gammait = gammas;
+  for (int i = 0; i < num; i++) {
     qaoa_inner(sv, plan, depth, dg, betait, gammait);
     sv_expec(sv, sv, cost, &res);
     results[i] = creal(res);
