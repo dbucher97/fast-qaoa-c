@@ -112,7 +112,12 @@ _lib.opt_lbfgs_qaoa.argtypes = [
     C.POINTER(Diagonals),
     ndpointer(NP_REAL),
     ndpointer(NP_REAL),
-    C.c_int,
+    C.POINTER(C.c_int),
+    C.POINTER(C.c_int),
+    ndpointer(NP_REAL),
+    C.POINTER(C.c_int),
+    C.POINTER(C.c_double),
+    C.POINTER(C.c_int),
     C.POINTER(C.c_int),
 ]
 
@@ -124,7 +129,12 @@ _lib.opt_lbfgs_qpe_qaoa.argtypes = [
     C.POINTER(Diagonals),
     ndpointer(NP_REAL),
     ndpointer(NP_REAL),
-    C.c_int,
+    C.POINTER(C.c_int),
+    C.POINTER(C.c_int),
+    ndpointer(NP_REAL),
+    C.POINTER(C.c_int),
+    C.POINTER(C.c_double),
+    C.POINTER(C.c_int),
     C.POINTER(C.c_int),
 ]
 
@@ -134,20 +144,60 @@ def optimize_qaoa_lbfgs(
     cost: Diagonals,
     betas: np.ndarray,
     gammas: np.ndarray,
-    maxiter: int = 1000,
     constr: Diagonals = None,
+    maxiter: int = 100,
+    tol: float = 1e-2,
+    linesearch: int = None,
+    m: int = 100,
 ) -> NamedTuple:
     betas = np.copy(betas).astype(NP_REAL)
     gammas = np.copy(gammas).astype(NP_REAL)
     it = C.c_int(0)
+    calls = C.c_int(0)
+    log = np.zeros(maxiter)
+    tol = C.c_double(tol) if tol is not None else None
+    linesearch = C.c_int(linesearch) if linesearch is not None else None
+    maxiter = C.c_int(maxiter) if maxiter is not None else None
+    m = C.c_int(m) if m else None
     if constr is None:
         res = _lib.opt_lbfgs_qaoa(
-            len(betas), diagonals, cost, betas, gammas, maxiter, it
+            len(betas),
+            diagonals,
+            cost,
+            betas,
+            gammas,
+            it,
+            calls,
+            log,
+            maxiter,
+            tol,
+            linesearch,
+            m,
         )
     else:
         res = _lib.opt_lbfgs_qpe_qaoa(
-            len(betas), diagonals, cost, constr, betas, gammas, maxiter, it
+            len(betas),
+            diagonals,
+            cost,
+            constr,
+            betas,
+            gammas,
+            it,
+            calls,
+            log,
+            maxiter,
+            tol,
+            linesearch,
+            m,
         )
 
-    Result = namedtuple("LBFGSResult", "status it betas gammas")
-    return Result(status=LBFGSStatus(res), betas=betas, gammas=gammas, it=it.value)
+    Result = namedtuple("LBFGSResult", "status it betas gammas calls log")
+    log = log[: it.value]
+    return Result(
+        status=LBFGSStatus(res),
+        betas=betas,
+        gammas=gammas,
+        it=it.value,
+        calls=calls.value,
+        log=log,
+    )

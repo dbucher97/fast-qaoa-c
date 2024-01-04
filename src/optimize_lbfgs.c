@@ -11,6 +11,7 @@
 
 typedef struct {
   int it;
+  int calls;
   statevector_t *sv_left;
   statevector_t *sv_right;
   statevector_t *sv_left_p;
@@ -18,6 +19,7 @@ typedef struct {
   const diagonals_t *dg;
   const diagonals_t *cost;
   const diagonals_t *constr;
+  real *log;
 #if USE_FLOAT32
   float *x;
   float *g;
@@ -56,7 +58,7 @@ static lbfgsfloatval_t evaluate_qaoa(void *instance, const lbfgsfloatval_t *x,
   }
 #endif
 
-  qaoa_instance->it++;
+  qaoa_instance->calls++;
   return (lbfgsfloatval_t)expectation_value;
 }
 
@@ -96,28 +98,51 @@ static lbfgsfloatval_t evaluate_qpe_qaoa(void *instance,
   }
 #endif
 
-  qaoa_instance->it++;
+  qaoa_instance->calls++;
   return (lbfgsfloatval_t)expectation_value;
 }
 
-// static int progress(void *instance, const lbfgsfloatval_t *x,
-//                     const lbfgsfloatval_t *g, const lbfgsfloatval_t fx,
-//                     const lbfgsfloatval_t xnorm, const lbfgsfloatval_t gnorm,
-//                     const lbfgsfloatval_t step, int n, int k, int ls) {
-//   printf("Iteration %d:\n", k);
-//   printf("  fx = %f, xnorm = %f, gnorm = %f, step = %f\n", fx, xnorm, gnorm,
-//          step);
-//   printf("\n");
-//   return 0;
-// }
+static int progress(void *instance, const lbfgsfloatval_t *x,
+                    const lbfgsfloatval_t *g, const lbfgsfloatval_t fx,
+                    const lbfgsfloatval_t xnorm, const lbfgsfloatval_t gnorm,
+                    const lbfgsfloatval_t step, int n, int k, int ls) {
+  qaoa_instance_t *qaoa = instance;
+  qaoa->it = k;
+  qaoa->log[k - 1] = (real)fx;
+  // printf("Iteration %d:\n", k);
+  // printf("  fx = %f, xnorm = %f, gnorm = %f, step = %f\n", fx, xnorm, gnorm,
+  //        step);
+  // printf("\n");
+  return 0;
+}
+
+void opt_parameter_init(lbfgs_parameter_t *param, const int *max_iter,
+                        const double *tol, const int *linesearch,
+                        const int *m) {
+  lbfgs_parameter_init(param);
+  if (max_iter != NULL)
+    param->max_iterations = *max_iter;
+  if (linesearch != NULL)
+    param->linesearch = *linesearch;
+  if (tol != NULL) {
+    param->epsilon = *tol;
+    param->ftol = *tol;
+  }
+  if (m != NULL)
+    param->m = *m;
+}
 
 int opt_lbfgs_qaoa(int depth, const diagonals_t *dg, const diagonals_t *cost,
-                   real *betas, real *gammas, const int max_iter, int* it) {
+                   real *betas, real *gammas, int *it, int *calls, real *log,
+                   const int *max_iter, const double *tol,
+                   const int *linesearch, const int *m) {
   statevector_t *sv_left = sv_malloc(dg->n_qubits);
   statevector_t *sv_right = sv_malloc(dg->n_qubits);
   frx_plan_t *plan = frx_make_plan(sv_left, RDX4);
 
-  qaoa_instance_t instance = {0, sv_left, sv_right, NULL, plan, dg, cost, NULL};
+  qaoa_instance_t instance = {
+      0, 0, sv_left, sv_right, NULL, plan, dg, cost, NULL, log,
+  };
 #ifdef USE_FLOAT32
   instance.x = malloc(2 * depth * sizeof(float));
   instance.g = malloc(2 * depth * sizeof(float));
@@ -127,7 +152,6 @@ int opt_lbfgs_qaoa(int depth, const diagonals_t *dg, const diagonals_t *cost,
 
   lbfgsfloatval_t fx;
   lbfgsfloatval_t *x = lbfgs_malloc(N);
-  lbfgs_parameter_t param;
   if (x == NULL) {
     printf("ERROR: Failed to allocate a memory block for variables.\n");
     return -1;
@@ -136,17 +160,18 @@ int opt_lbfgs_qaoa(int depth, const diagonals_t *dg, const diagonals_t *cost,
     x[i] = betas[i];
     x[depth + i] = gammas[i];
   }
-  lbfgs_parameter_init(&param);
-  param.max_iterations = max_iter;
+  lbfgs_parameter_t param;
+  opt_parameter_init(&param, max_iter, tol, linesearch, m);
 
   int ret;
-  ret = lbfgs(N, x, &fx, evaluate_qaoa, NULL, &instance, &param);
+  ret = lbfgs(N, x, &fx, evaluate_qaoa, progress, &instance, &param);
 
   for (int i = 0; i < depth; i++) {
     betas[i] = x[i];
     gammas[i] = x[depth + i];
   }
   *it = instance.it;
+  *calls = instance.calls;
 
   lbfgs_free(x);
   sv_free(sv_left);
@@ -161,14 +186,16 @@ int opt_lbfgs_qaoa(int depth, const diagonals_t *dg, const diagonals_t *cost,
 
 int opt_lbfgs_qpe_qaoa(int depth, const diagonals_t *dg,
                        const diagonals_t *cost, const diagonals_t *constr,
-                       real *betas, real *gammas, const int max_iter, int* it) {
+                       real *betas, real *gammas, int *it, int *calls,
+                       real *log, const int *max_iter, const double *tol,
+                       const int *linesearch, const int *m) {
   statevector_t *sv_left = sv_malloc(dg->n_qubits);
   statevector_t *sv_right = sv_malloc(dg->n_qubits);
   statevector_t *sv_left_p = sv_malloc(dg->n_qubits);
   frx_plan_t *plan = frx_make_plan(sv_left, RDX4);
 
-  qaoa_instance_t instance = {0,    sv_left, sv_right, sv_left_p,
-                              plan, dg,      cost,     constr};
+  qaoa_instance_t instance = {0,    0,  sv_left, sv_right, sv_left_p,
+                              plan, dg, cost,    constr,   log};
 #ifdef USE_FLOAT32
   instance.x = malloc(2 * depth * sizeof(float));
   instance.g = malloc(2 * depth * sizeof(float));
@@ -178,7 +205,6 @@ int opt_lbfgs_qpe_qaoa(int depth, const diagonals_t *dg,
 
   lbfgsfloatval_t fx;
   lbfgsfloatval_t *x = lbfgs_malloc(N);
-  lbfgs_parameter_t param;
   if (x == NULL) {
     printf("ERROR: Failed to allocate a memory block for variables.\n");
     return -1;
@@ -187,20 +213,18 @@ int opt_lbfgs_qpe_qaoa(int depth, const diagonals_t *dg,
     x[i] = betas[i];
     x[depth + i] = gammas[i];
   }
-  lbfgs_parameter_init(&param);
-  param.max_iterations = max_iter;
-  param.m = 100;
-  param.epsilon = 1e-2;
-  param.linesearch = 2;
+  lbfgs_parameter_t param;
+  opt_parameter_init(&param, max_iter, tol, linesearch, m);
 
   int ret;
-  ret = lbfgs(N, x, &fx, evaluate_qpe_qaoa, NULL, &instance, &param);
+  ret = lbfgs(N, x, &fx, evaluate_qpe_qaoa, progress, &instance, &param);
 
   for (int i = 0; i < depth; i++) {
     betas[i] = x[i];
     gammas[i] = x[depth + i];
   }
   *it = instance.it;
+  *calls = instance.calls;
 
   lbfgs_free(x);
   sv_free(sv_left);

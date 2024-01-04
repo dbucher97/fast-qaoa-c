@@ -1,6 +1,7 @@
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import Future, ThreadPoolExecutor
 import sys
 from time import perf_counter
+import time
 
 import numpy as np
 import pandas as pd
@@ -78,7 +79,6 @@ def run_qaoa(
                 betas, gammas = params.interpolate(p, betas, gammas)
         else:
             betas, gammas = get_initial(exp, p, dg, cost)
-
 
         a = perf_counter()
         result = optimize_qaoa_lbfgs(dg, cost, betas, gammas, constr=constr)
@@ -181,7 +181,8 @@ def run_experiment(exp: ExperimentCollection, num_workers: int = 4):
     tpe = ThreadPoolExecutor(max_workers=num_workers)
 
     instances = Problem.get_instances()
-    data = []
+    futures = []
+    results = []
 
     for size in aslist(exp.sizes):
         print(f"\nRunning experiments for size {size}...")
@@ -200,17 +201,36 @@ def run_experiment(exp: ExperimentCollection, num_workers: int = 4):
                 continue
             iter_instances = instances[size]
 
-        results = tpe.map(lambda i: run_experiment_for_instance(i, exp), iter_instances)
+        for instance in tqdm(iter_instances):
+            futures.append(
+                tpe.submit(lambda i: run_experiment_for_instance(i, exp), instance)
+            )
 
-        for i, res in enumerate(tqdm(results, total=len(iter_instances), ncols=80)):
-            data += res
-            if (i + 1) % 32 == 0:
-                df = pd.DataFrame.from_records(data)
+            if len(futures) >= tpe._max_workers:
+                res = [f for f in futures if f.done()]
+                while len(res) == 0:
+                    time.sleep(0.1)
+                    res = [f for f in futures if f.done()]
+                futures = [f for f in futures if f not in res]
+                for f in res:
+                    results += f.result()
+
+            if len(results) >= 32:
+                df = pd.DataFrame.from_records(results)
                 exp.add_results(df)
-                data = []
+                results = []
 
-        if len(data) > 0:
-            df = pd.DataFrame.from_records(data)
+        # results = tpe.map(lambda i: run_experiment_for_instance(i, exp), iter_instances)
+
+        # for i, res in enumerate(tqdm(results, total=len(iter_instances), ncols=80)):
+        #     data += res
+        #     if (i + 1) % 32 == 0:
+        #         df = pd.DataFrame.from_records(data)
+        #         exp.add_results(df)
+        #         data = []
+
+        if len(results) > 0:
+            df = pd.DataFrame.from_records(results)
             exp.add_results(df)
 
 
@@ -238,4 +258,3 @@ if __name__ == "__main__":
         exp.load_results()
         print(exp)
         run_experiment(exp, n_workers)
-
