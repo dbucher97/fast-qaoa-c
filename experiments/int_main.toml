@@ -1,4 +1,4 @@
-n_workers = 30
+n_workers = 48
 
 [int_main]
 problem = "IntegerKnapsack"
@@ -26,4 +26,4 @@ cost = "masked_cost"
 [[int_main.qaoa]]
 kind = "quad_penalty_full_problem"
 cost = "masked_cost"
-until_size = 14
+until_size = 12

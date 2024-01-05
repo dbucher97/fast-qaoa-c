@@ -4,13 +4,14 @@ SRC_DIR = ./src
 BUILD_DIR = ./build
 
 
-CFLAGS ?= -I$(INC_DIR) -O2 -march=native -mtune=native
+CFLAGS ?= -I$(INC_DIR) -O3 -march=native -mtune=native
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
 TARGET = libqaoa.so
 TARGET32 = libqaoa32.so
-DYLIB = -fPIC -shared
+DYLIB = -shared
+CFLAGS += -fPIC
 else
 CFLAGS += -I/opt/homebrew/include/
 LDFLAGS += -L/opt/homebrew/lib/

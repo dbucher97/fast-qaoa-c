@@ -229,9 +229,12 @@ def run_experiment(exp: ExperimentCollection, num_workers: int = 4):
         #         exp.add_results(df)
         #         data = []
 
-        if len(results) > 0:
-            df = pd.DataFrame.from_records(results)
-            exp.add_results(df)
+    for f in futures:
+        results += f.result()
+
+    if len(results) > 0:
+        df = pd.DataFrame.from_records(results)
+        exp.add_results(df)
 
 
 def parse_settings(exp: ExperimentCollection):
