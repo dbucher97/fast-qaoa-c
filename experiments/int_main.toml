@@ -5,7 +5,7 @@ problem = "IntegerKnapsack"
 gamma_scale = 0.1
 beta_scale= 0.1
 
-sizes = [6, 8, 10, 12, 14, 16, 18, 20]
+sizes = [6, 8, 10, 12, 14, 16, 18, 20, 22]
 instances = 64
 depths = [1, 2, 4, 8, 16]
 
@@ -26,4 +26,4 @@ cost = "masked_cost"
 [[int_main.qaoa]]
 kind = "quad_penalty_full_problem"
 cost = "masked_cost"
-until_size = 12
+until_size = 14
