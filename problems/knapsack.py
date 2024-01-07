@@ -2,12 +2,11 @@ from typing import List, Tuple
 from dataclasses import dataclass
 
 from fastqaoa.ctypes.diagonals import Diagonals
-from .problem import ProblemBase
+from problems.problem import ProblemBase
 
 import qubovert as qv
 
 import numpy as np
-from functools import cached_property
 
 
 @dataclass
@@ -89,3 +88,9 @@ class Knapsack(ProblemBase):
             del self._constr
         if hasattr(self, "_penalty"):
             del self._penalty
+
+if __name__ == "__main__":
+    for s in range(6, 30):
+        while Knapsack.next_id(s) < 256:
+            Knapsack.random_instance(s).add()
+    Knapsack.store()

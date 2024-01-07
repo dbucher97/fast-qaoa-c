@@ -1,7 +1,9 @@
 from concurrent.futures import Future, ThreadPoolExecutor
 import sys
 from time import perf_counter
+import itertools
 import time
+
 
 import numpy as np
 import pandas as pd
@@ -47,26 +49,25 @@ def run_qaoa(
     metrics_cost: Diagonals,
     constraint_data: Diagonals,
     exp: ExperimentCollection,
-    query: Dict[str, Any],
+    stored: pd.DataFrame,
     constr=None,
 ):
     results = []
 
-    lquery = query.copy()
-
     isfirst = True
     betas = None
     for p in exp.depths:
-        lquery.update({"depth": p})
-        entry = exp.get_stored(lquery)
-        if entry is not None:
-            continue
+        if stored is not None:
+            entry = stored.query("depth == @p")
+            if len(entry) != 0:
+                continue
 
         if exp.interpolate:
             if isfirst:
                 idx = exp.depths.index(p)
                 if idx > 0:
-                    last_entry = lquery.update({"depth": exp.depths[idx - 1]})
+                    dl = exp.depths[idx - 1]
+                    last_entry = stored.query("depth == @dl").iloc[0]
                     if last_entry is not None:
                         betas = last_entry["betas"]
                         gammas = last_entry["gammas"]
@@ -121,8 +122,19 @@ def get_query_dict(instance: ProblemBase, run: Experiment, exp: ExperimentCollec
     }
 
 
+def check_all_done(df: pd.DataFrame, exp: ExperimentCollection):
+    x = set(itertools.product(exp.depths, range(exp.repeat)))
+    y = set(zip(map(int, df.depth), map(int, df.rep)))
+    return x == y
+
+
 def run_default(instance: ProblemBase, run: Experiment, exp: ExperimentCollection):
     results = []
+    query = get_query_dict(instance, run, exp)
+    stored = exp.get_stored(query)
+    if stored is not None and check_all_done(stored, exp):
+        return results
+
     d = asdict(run.settings_obj)
     if isinstance(run.settings_obj, QuadPenaltyCostSettings):
         if run.settings_obj.penalty == -2:
@@ -136,10 +148,16 @@ def run_default(instance: ProblemBase, run: Experiment, exp: ExperimentCollectio
     scale = max(abs(dg.min_val), abs(dg.max_val))
     dg = dg * dg.n_qubits / scale
 
-    query = get_query_dict(instance, run, exp)
     _, weights = instance.diagonalized()
     for r in range(exp.repeat):
-        e = run_qaoa(dg, cost, instance.masked_cost(), weights, exp, query)
+        e = run_qaoa(
+            dg,
+            cost,
+            instance.masked_cost(),
+            weights,
+            exp,
+            None if stored is None else stored.query("rep == @r"),
+        )
         for ei in e:
             ei.update({"rep": r})
         results += e
@@ -181,11 +199,14 @@ def run_experiment(exp: ExperimentCollection, num_workers: int = 4):
     tpe = ThreadPoolExecutor(max_workers=num_workers)
 
     instances = Problem.get_instances()
-    futures = []
+
+    runs = []
+    prog_bars = {}
+    # futures = []
     results = []
 
-    for size in aslist(exp.sizes):
-        print(f"\nRunning experiments for size {size}...")
+    for pos, size in enumerate(aslist(exp.sizes)):
+        # print(f"\nRunning experiments for size {size}...")
         if exp.instances is not None:
             if size in instances:
                 num_instances = len(instances[size])
@@ -201,36 +222,59 @@ def run_experiment(exp: ExperimentCollection, num_workers: int = 4):
                 continue
             iter_instances = instances[size]
 
-        for instance in tqdm(iter_instances):
-            futures.append(
-                tpe.submit(lambda i: run_experiment_for_instance(i, exp), instance)
-            )
+        runs += iter_instances
+        prog_bars[size] = tqdm(
+            total=len(iter_instances), position=pos, desc=f"Size {size:02}", ncols=80
+        )
 
-            if len(futures) >= tpe._max_workers:
-                res = [f for f in futures if f.done()]
-                while len(res) == 0:
-                    time.sleep(0.1)
-                    res = [f for f in futures if f.done()]
-                futures = [f for f in futures if f not in res]
-                for f in res:
-                    results += f.result()
+    def _run(instance):
+        ret = run_experiment_for_instance(instance, exp)
+        return instance.n_qubits, ret
 
-            if len(results) >= 32:
-                df = pd.DataFrame.from_records(results)
-                exp.add_results(df)
-                results = []
+    for size, res in tpe.map(_run, runs):
+        results += res
 
-        # results = tpe.map(lambda i: run_experiment_for_instance(i, exp), iter_instances)
+        prog_bars[size].update()
+        if prog_bars[size].n == prog_bars[size].total:
+            prog_bars[size].refresh()
 
-        # for i, res in enumerate(tqdm(results, total=len(iter_instances), ncols=80)):
-        #     data += res
-        #     if (i + 1) % 32 == 0:
-        #         df = pd.DataFrame.from_records(data)
+        if len(results) >= 240:
+            print("store")
+            df = pd.DataFrame.from_records(results)
+            exp.add_results(df)
+            results = []
+
+        # old 2 -------------------------------------------
+        # for instance in tqdm(iter_instances):
+        #     futures.append(
+        #         tpe.submit(lambda i: run_experiment_for_instance(i, exp), instance)
+        #     )
+        #
+        #     if len(futures) >= tpe._max_workers:
+        #         res = [f for f in futures if f.done()]
+        #         while len(res) == 0:
+        #             time.sleep(0.1)
+        #             res = [f for f in futures if f.done()]
+        #         futures = [f for f in futures if f not in res]
+        #         for f in res:
+        #             results += f.result()
+        #
+        #     if len(results) >= 32:
+        #         df = pd.DataFrame.from_records(results)
         #         exp.add_results(df)
-        #         data = []
+        #         results = []
+    # for f in futures:
+    #     results += f.result()
 
-    for f in futures:
-        results += f.result()
+    # old 1 -------------------------------------------------
+    # results = tpe.map(lambda i: run_experiment_for_instance(i, exp), iter_instances)
+
+    # for i, res in enumerate(tqdm(results, total=len(iter_instances), ncols=80)):
+    #     data += res
+    #     if (i + 1) % 32 == 0:
+    #         df = pd.DataFrame.from_records(data)
+    #         exp.add_results(df)
+    #         data = []
 
     if len(results) > 0:
         df = pd.DataFrame.from_records(results)

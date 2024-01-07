@@ -109,6 +109,10 @@ class ExperimentCollection:
     class Config:
         exclude = ["_result"]
 
+    @property
+    def df(self):
+        return self._result
+
     def get_stored(self, query):
         if self._result is None:
             return None
@@ -121,7 +125,7 @@ class ExperimentCollection:
                     res = res[res[k] == v]
                 if len(res) == 0:
                     return None
-            return res.iloc[0]
+            return res
 
     def load_results(self):
         path = os.path.join(self.path, self.name + ".feather")

@@ -116,6 +116,10 @@ class Diagonals(C.Structure):
     def __truediv__(self, other: float):
         return self.__mul__(1 / other)
 
+    def scale_between_sym(self, bound: float = 1.):
+        scale = max(abs(self.min_val), abs(self.max_val))
+        return self * (bound / scale)
+
 _lib.dg_print.argtypes = [C.POINTER(Diagonals)]
 _lib.dg_print.restype = None
 
