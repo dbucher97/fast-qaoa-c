@@ -16,8 +16,20 @@ from fastqaoa.ctypes import Diagonals
 from fastqaoa.ctypes.metrics import Metrics
 from fastqaoa.ctypes.optimize import optimize_qaoa_adam, optimize_qaoa_lbfgs
 from fastqaoa.ctypes.qaoa import qaoa
+from fastqaoa.ctypes.qpe_qaoa import qpe_qaoa
+from fastqaoa.indicator import get_indicator_interpolator, interpolate_diagonals
+
 from problems.experiment_structure import *
 from problems.problem import ProblemBase
+
+__interpolators = {}
+
+
+def get_interpolator(M: int, shift: float = 0.0):
+    global __interpolators
+    if (M, shift) not in __interpolators:
+        __interpolators[(M, shift)] = get_indicator_interpolator(M, 4, shift=shift)
+    return __interpolators[(M, shift)]
 
 
 def get_initial(exp: ExperimentCollection, depth: int, dg: Diagonals, cost: Diagonals):
@@ -87,25 +99,26 @@ def run_qaoa(
         betas = result.betas
         gammas = result.gammas
 
-        sv = qaoa(dg, betas, gammas)
+        psucc = None
+        if constr is None:
+            sv = qaoa(dg, betas, gammas)
+        else:
+            sv, psucc = qpe_qaoa(dg, constr, betas, gammas)
 
         isfirst = False
-        results.append(
-            {
-                "depth": p,
-                **Metrics.compute(sv, metrics_cost, constraint_data).dump(),
-                "iterations": result.it,
-                "status": result.status.name,
-                "betas": betas,
-                "gammas": gammas,
-                "runtime": b - a,
-            }
-        )
+        data = {
+            "depth": p,
+            **Metrics.compute(sv, metrics_cost, constraint_data).dump(),
+            "iterations": result.it,
+            "status": result.status.name,
+            "betas": betas,
+            "gammas": gammas,
+            "runtime": b - a,
+        }
+        if constr is not None:
+            data["p_succ"] = psucc
+        results.append(data)
     return results
-
-
-# def run_qpe(instance: ProblemBase, run: Experiment, exp: ExperimentCollection):
-#     raise NotImplementedError()
 
 
 def get_query_dict(instance: ProblemBase, run: Experiment, exp: ExperimentCollection):
@@ -126,6 +139,45 @@ def check_all_done(df: pd.DataFrame, exp: ExperimentCollection):
     x = set(itertools.product(exp.depths, range(exp.repeat)))
     y = set(zip(map(int, df.depth), map(int, df.rep)))
     return x == y
+
+
+def run_qpe(instance: ProblemBase, run: Experiment, exp: ExperimentCollection):
+    results = []
+    query = get_query_dict(instance, run, exp)
+    query["ancilla"] = run.settings_obj.ancilla
+    query["shift"] = run.settings_obj.shift
+    stored = exp.get_stored(query)
+    if stored is not None and check_all_done(stored, exp):
+        return results
+    dg, weights = instance.diagonalized()
+    scale = max(abs(dg.min_val), abs(dg.max_val))
+    dg = dg * dg.n_qubits / scale
+
+    constr = weights.scale_between_sym()
+    interp = get_interpolator(run.settings_obj.ancilla, run.settings_obj.shift)
+
+    constr = interpolate_diagonals(interp, constr)
+
+    cost = instance.masked_cost()
+
+    for r in range(exp.repeat):
+        e = run_qaoa(
+            dg,
+            cost,
+            cost,
+            weights,
+            exp,
+            None if stored is None else stored.query("rep == @r"),
+            constr=constr,
+        )
+        for ei in e:
+            ei.update({"rep": r})
+        results += e
+
+    for r in results:
+        r.update(query)
+
+    return results
 
 
 def run_default(instance: ProblemBase, run: Experiment, exp: ExperimentCollection):
@@ -180,8 +232,7 @@ def run_experiment_for_instance(instance: ProblemBase, exp: ExperimentCollection
         if run.until_size is not None and instance.n_qubits > run.until_size:
             continue
         if run.kind == QAOAKind.QPE:
-            # results += run_qpe(instance, run, exp)
-            pass
+            results += run_qpe(instance, run, exp)
         else:
             results += run_default(instance, run, exp)
     instance.decache()
@@ -238,8 +289,7 @@ def run_experiment(exp: ExperimentCollection, num_workers: int = 4):
         if prog_bars[size].n == prog_bars[size].total:
             prog_bars[size].refresh()
 
-        if len(results) >= 240:
-            print("store")
+        if len(results) >= 120:
             df = pd.DataFrame.from_records(results)
             exp.add_results(df)
             results = []

@@ -53,8 +53,8 @@ class QuadPenaltyFullProblemSettings(QuadPenaltyCostSettings):
 
 @dataclass
 class QPESettings(Settings):
-    ancilla: Union[float, List[float]]
-    shift: Union[float, List[float]] = 0
+    ancilla: int
+    shift: float = 0.
 
 
 class CostKind(str, Enum):
