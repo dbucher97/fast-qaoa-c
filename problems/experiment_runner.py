@@ -238,8 +238,7 @@ def run_experiment(exp: ExperimentCollection, num_workers: int = 4):
         if prog_bars[size].n == prog_bars[size].total:
             prog_bars[size].refresh()
 
-        if len(results) >= 240:
-            print("store")
+        if len(results) >= 120:
             df = pd.DataFrame.from_records(results)
             exp.add_results(df)
             results = []
