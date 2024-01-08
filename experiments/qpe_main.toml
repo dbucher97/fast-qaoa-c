@@ -1,24 +1,22 @@
-n_workers = 4
+n_workers = 1
 
 [qpe_main]
 problem = "Knapsack"
 gamma_scale = 0.1
 beta_scale= 0.1
 
-sizes = [6, 8, 10, 12]
+sizes = [6, 8, 10, 12, 14, 16, 18, 20, 22]
 instances = 64
-depths = [1, 2, 4, 8, 16, 32]
+depths = [1, 2, 4, 8, 16]
 
-[[qpe_main.qaoa]]
-kind = "masked_cost"
-
-[[qpe_main.qaoa]]
-kind = "qpe"
-settings = {"ancilla" = 4, "shift" = 0.6}
 
 [[qpe_main.qaoa]]
 kind = "qpe"
 settings = {"ancilla" = 2, "shift" = 0.6}
+
+[[qpe_main.qaoa]]
+kind = "qpe"
+settings = {"ancilla" = 4, "shift" = 0.6}
 
 [[qpe_main.qaoa]]
 kind = "qpe"
@@ -27,3 +25,6 @@ settings = {"ancilla" = 8, "shift" = 0.6}
 [[qpe_main.qaoa]]
 kind = "qpe"
 settings = {"ancilla" = 16, "shift" = 0.6}
+
+[[qpe_main.qaoa]]
+kind = "masked_cost"
