@@ -5,7 +5,7 @@ problem = "IntegerKnapsack"
 gamma_scale = 0.1
 beta_scale= 0.1
 
-sizes = [6, 8, 10, 12, 14, 16, 18, 20, 22]
+sizes = [6, 8, 10, 12, 14, 16, 18, 20, 22, 24]
 instances = 64
 depths = [1, 2, 4, 8, 16]
 
