@@ -1,0 +1,30 @@
+n_workers = 32
+
+[qpe_main_test]
+problem = "Knapsack"
+gamma_scale = 0.1
+beta_scale= 0.1
+
+sizes = [12, 14]
+instances = 64
+depths = [1, 2, 4, 8, 16]
+
+
+[[qpe_main_test.qaoa]]
+kind = "qpe"
+settings = {"ancilla" = 2, "shift" = 0.6}
+
+[[qpe_main_test.qaoa]]
+kind = "qpe"
+settings = {"ancilla" = 4, "shift" = 0.6}
+
+[[qpe_main_test.qaoa]]
+kind = "qpe"
+settings = {"ancilla" = 8, "shift" = 0.6}
+
+[[qpe_main_test.qaoa]]
+kind = "qpe"
+settings = {"ancilla" = 16, "shift" = 0.6}
+
+[[qpe_main_test.qaoa]]
+kind = "masked_cost"

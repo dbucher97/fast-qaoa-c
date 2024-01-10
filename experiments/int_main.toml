@@ -21,9 +21,9 @@ cost = "masked_cost"
 
 [[int_main.qaoa]]
 kind = "quad_penalty_full_problem"
-until_size = 14
+until_size = 16
 
 [[int_main.qaoa]]
 kind = "quad_penalty_full_problem"
 cost = "masked_cost"
-until_size = 14
+until_size = 16
