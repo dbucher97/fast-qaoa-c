@@ -44,12 +44,20 @@ class Knapsack(ProblemBase):
 
         return self._cost, self._constr
 
-    def masked_cost(self):
-        if hasattr(self, "_masked"):
+    def masked_cost(self, mask_val: float = 0.):
+        if hasattr(self, "_masked") and mask_val == 0:
             return self._masked
         cost, constr = self.diagonalized()
-        self._masked = cost.mask(constr, 0, Diagonals.GTE)
-        return self._masked
+        masked = cost.mask(constr, 0, Diagonals.GTE, mask_val)
+        if mask_val == 0:
+            self._masked = masked
+        return masked
+
+    def kickback_cost(self):
+        masked = self.masked_cost()
+        cost, _ = self.diagonalized()
+        kickback = -cost.to_numpy() + 2 * masked.to_numpy()
+        return Diagonals.from_numpy(kickback)
 
     def quad_penalty_cost(self, penalty: float = None):
         cost, constr = self.diagonalized()

@@ -28,6 +28,7 @@ class QAOAKind(str, Enum):
     MaskedCost = "masked_cost"
     QuadPenaltyCost = "quad_penalty_cost"
     QuadPenaltyFullProblem = "quad_penalty_full_problem"
+    KickbackCost = "kickback_cost"
     QPE = "qpe"
 
 
@@ -38,6 +39,10 @@ class Settings:
 
 @dataclass
 class MaskedCostSettings(Settings):
+    ...
+
+@dataclass
+class KickbackCostSettings(Settings):
     ...
 
 
