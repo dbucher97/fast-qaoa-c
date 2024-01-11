@@ -1,11 +1,11 @@
-n_workers = 64
+n_workers = 96
 
 [int_main]
 problem = "IntegerKnapsack"
 gamma_scale = 0.1
 beta_scale= 0.1
 
-sizes = [6, 8, 10, 12, 14, 16, 18, 20, 22, 24]
+sizes = [6, 8, 10, 12, 14, 16, 18, 20, 22]
 instances = 64
 depths = [1, 2, 4, 8, 16]
 
@@ -17,6 +17,10 @@ kind = "quad_penalty_cost"
 
 [[int_main.qaoa]]
 kind = "quad_penalty_cost"
+cost = "masked_cost"
+
+[[int_main.qaoa]]
+kind = "kickback_cost"
 cost = "masked_cost"
 
 [[int_main.qaoa]]
