@@ -1,4 +1,4 @@
-n_workers = 60
+n_workers = 96
 
 [pisinger_main]
 gamma_scale = 0.1
@@ -7,7 +7,7 @@ beta_scale= 0.1
 problem = "IntegerKnapsackPisinger"
 sizes = [20]
 
-instances = 10
+instances = 16
 gen_types = [11, 12, 13, 14, 15, 16]
 depths = [1, 2, 4, 8, 16]
 
