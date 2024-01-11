@@ -2,7 +2,7 @@ import os
 from dataclasses import dataclass, asdict
 from abc import ABC, abstractmethod
 import pandas as pd
-import inspect
+from pathlib import Path
 
 PROBLEM_DATA_PATH = "data/"
 PROBLEM_DATA_PATH = os.environ.get("PROBLEM_DATA_PATH", PROBLEM_DATA_PATH)
@@ -22,8 +22,9 @@ class ProblemBase(ABC):
     def get_instances(cls):
         global _instances
         if not cls.__name__ in _instances:
-            path = os.path.join(PROBLEM_DATA_PATH, f"{cls.__name__}.feather")
-            if os.path.exists(path):
+            path = Path(__file__).parent.parent / PROBLEM_DATA_PATH
+            path = path / f"{cls.__name__}.feather"
+            if path.exists():
                 data = {}
                 df = pd.read_feather(path)
                 def inner(r):

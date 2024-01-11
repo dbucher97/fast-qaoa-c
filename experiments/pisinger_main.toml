@@ -1,0 +1,30 @@
+n_workers = 60
+
+[pisinger_main]
+gamma_scale = 0.1
+beta_scale= 0.1
+
+problem = "IntegerKnapsackPisinger"
+sizes = [20]
+
+instances = 10
+gen_types = [11, 12, 13, 14, 15, 16]
+depths = [1, 2, 4, 8, 16]
+
+[[pisinger_main.qaoa]]
+kind = "masked_cost"
+
+[[pisinger_main.qaoa]]
+kind = "quad_penalty_cost"
+
+[[pisinger_main.qaoa]]
+kind = "quad_penalty_cost"
+cost = "masked_cost"
+
+[[qpe_main.qaoa]]
+kind = "qpe"
+settings = {"ancilla" = 4, "shift" = 0.6}
+
+[[qpe_main.qaoa]]
+kind = "qpe"
+settings = {"ancilla" = 8, "shift" = 0.6}
