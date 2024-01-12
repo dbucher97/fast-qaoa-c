@@ -1,4 +1,4 @@
-n_workers = 64
+n_workers = 96
 
 [qpe_main]
 problem = "Knapsack"
