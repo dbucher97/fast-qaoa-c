@@ -22,6 +22,10 @@ kind = "quad_penalty_cost"
 cost = "masked_cost"
 
 [[pisinger_main.qaoa]]
+kind = "kickback_cost"
+cost = "masked_cost"
+
+[[pisinger_main.qaoa]]
 kind = "qpe"
 settings = {"ancilla" = 4, "shift" = 0.6}
 
