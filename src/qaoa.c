@@ -123,8 +123,21 @@ void qaoa_inner(statevector_t *sv, frx_plan_t *plan, const int depth,
                 const diagonals_t *dg, const real *betas, const real *gammas) {
   cmplx val = 1 / sqrt(1 << sv->n_qubits);
   for (size_t i = 0; i < 1 << sv->n_qubits; i++) {
-    sv->data[i] = val;
+    sv->data[i] = 0;
   }
+  sv->data[0] = 1;
+
+  // // For infeasiblility preselection.
+  // size_t n_feas = 0;
+  // for (size_t i = 0; i < 1 << dg->n_qubits; i++) {
+  //   if (dg->data[i] < 0) {
+  //     n_feas += 1;
+  //   }
+  // }
+  // cmplx val = 1 / sqrt((float)n_feas);
+  // for (size_t i = 0; i < 1 << sv->n_qubits; i++) {
+  //   sv->data[i] = (dg->data[i] < 0) ? val : 0;
+  // }
 
   for (int p = 0; p < depth; p++) {
     apply_diagonals(sv, dg, gammas[p]);
