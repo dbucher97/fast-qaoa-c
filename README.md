@@ -1,31 +1,31 @@
 # Fast-QAOA
 
-A fast and leightweight Quantum Approximate Optimization Ansatz simulator with fast
-differentiation written in C.
+A fast and lightweight Quantum Approximate Optimization Ansatz simulator with fast
+differentiation is written in C.
 
 ## Installation
 
-Fast-QAOA depends on roughtly nothing, On the python side, it requires `numpy` and on the
-C side, it requires `liblbfgs`, wich is availible through most package managers.
+Fast-QAOA depends on roughly nothing, On the Python side, it requires `numpy`, and on the
+C side, it requires `liblbfgs`, which is available through most package managers.
 
 ```
 poetry install
 ```
 should install the dependencies and build the C dependencies. The Makefile should work
-on Linux and MacOs (Apple-Silicon) systems. However, manual adjustemnts might be
-neccessary is some cases.
+on Linux and MacOs (Apple-Silicon) systems. However, manual adjustments might be
+necessary in some cases.
 
 
 ## Concept
 
 Fast-QAOA relies on the fact that the optimization problem gets brute forced in each
 application of the problem Hamiltonian evolution of QAOA. In deep circuits, as well as,
-for paramter optimization, the brute forced result can be stored and directly applied by
-multiplication on the statevector.
+for parameter optimization, the brute-forced result can be stored and directly applied by
+multiplication on the state vector.
 
-Fruthermore, the application of the mixer hamiltonian, commonly an application of
-Pauli-X-rotations on all qubits has a similar structure to the Fast-Fourier-Transform.
-Only O(N log N) operations are therefore required for one iteration. Likewiese to FFT,
+Furthermore, the application of the mixer Hamiltonian, commonly an application of
+Pauli-X-rotations on all qubits have a similar structure to the Fast-Fourier-Transform.
+Only O(N log N) operations are therefore required for one iteration. Likewise to FFT,
 the simultaneous application of two gates may save some operations (In FFT these are
 called radix-4-butterflies). This implementation prefers two-gate applications over
 single-gate ones.
@@ -35,9 +35,9 @@ single-gate ones.
 ### Diagonalization
 
 As the main part of Fast-QAOA is the stored and diagonalized Hamiltonian, we start by
-brute-forcing the optimization problem to hand. In the following we do that with an
-examplatory Max-Cut problem. Max-Cut is not further introduced here, for more
-information, see [here](https://en.wikipedia.org/max_cut).
+brute-forcing the optimization problem to hand. In the following, we do that with an
+exemplary Max-Cut problem. Max-Cut is not further introduced here, for more
+information, see [here](https://en.wikipedia.org/Maximum_cut).
 
 The problem is defined on a graph
 ```python
@@ -55,7 +55,7 @@ terms.update({(v,): -float(G.degree(v)) for v in G.nodes()})
 # }
 ```
 
-The Hamiltonian is of form sum of product of binary variables times bias. The product is
+The Hamiltonian is the sum of the product of binary variables times bias. The product is
 given as tuple keys of a dictionary. Now, utilizing the `Diagonals` object, we can brute
 force the problem, as follows
 
@@ -70,10 +70,10 @@ dg = Diagonals.brute_force_hamiltonian(6, terms)
 ### QAOA application
 
 The QAOA circuit is paramterized by `p` betas and gammas paramters, for now hardcoded
-as. Yet, `fastqoaa.params` features parameter initialization methods. The full qaoa
+as. Yet, `fastqoaa.params` features parameter initialization methods. The full QAOA
 circuit can be computed by simply
 ```python
-from fastqoaa import qaoa
+from fastqaoa import qaoa
 
 betas = [0.9, 0.5, 0.1]
 gammas = [0.1, 0.5, 0.9]
@@ -86,22 +86,22 @@ it by
 print(dg.expec(sv))
 # -4.922789608617443
 ```
-or sample form the statevector probabilities, i.e. measuring the prepared state
+or sample form the state vector probabilities, i.e. measuring the prepared state
 frequently
 ```python
 samples = sv.sample(100)
 
-# The expectation value can also be computed form the samples
+# The expectation value can also be computed from the samples
 print(dg.expec(samples))
 # -4.95
 ```
 
-### Paramter Optimization
+### Parameter Optimization
 
-Tha parameters can be optimized using the cost function from beforehand and
-gradient free optimizers. Alternatively, we can use gradient based optimizers. In a QC
-applicaiton, that would require gradient computition through methods like paramter
-shift. Nevertheless, in simulation we can rely on computing the exact gradient
+The parameters can be optimized using the cost function from beforehand and
+gradient-free optimizers. Alternatively, we can use gradient-based optimizers. In a QC
+application, that would require gradient computation through methods like parameter
+shift. Nevertheless, in simulation, we can rely on computing the exact gradient
 ```python
 from fastqaoa import grad_qaoa
 
@@ -114,11 +114,11 @@ The second `dg` in `grad_qaoa` refers to the Hamiltonian, w.r.t. wich the derive
 expectation values is calculated. In principle, this one can deviate from the Problem
 Hamiltonian.
 
-Fast-QAOA features an built in parameter optimizer based on L-BFGS. The limited memory
-part ins not really important, as the number of parameters considered is generallly
-small. However, `liblbfgs` is a nice implementation of the BFGS procedure.
+Fast-QAOA features a built-in parameter optimizer based on L-BFGS. The limited memory
+part is not really important, as the number of parameters considered is generally
+not the bottleneck. However, `liblbfgs` is an excellent implementation of the BFGS procedure.
 
-To optimize paramters, simply write
+To optimize parameters, simply write
 ```python
 from fastqaoa import optimize_qaoa_lbfgs
 
@@ -130,8 +130,8 @@ res = optimize_qaoa_lbfgs(dg, dg, betas, gammas)
 
 ### Evaluate results
 
-Fast-QAOA comes with an metrics tool that automatically computes most of the important
-metrics for QAOA resutls. It is used as shown below
+Fast-QAOA comes with a metrics tool that automatically computes most of the important
+metrics for QAOA results. It is used as shown below
 
 ```python
 from fastqaoa import Metrics
@@ -147,5 +147,5 @@ print(metrics.dump())
 
 ## Notes on documentation
 
-The documentation is unfortunately so far very tenuous. Any user of the library should
-be welcomed to contribute to the docs.
+The documentation is, unfortunately, so far very tenuous. Any user of the library should
+be welcome to contribute to the docs.
