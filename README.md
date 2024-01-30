@@ -37,7 +37,7 @@ single-gate ones.
 As the main part of Fast-QAOA is the stored and diagonalized Hamiltonian, we start by
 brute-forcing the optimization problem to hand. In the following we do that with an
 examplatory Max-Cut problem. Max-Cut is not further introduced here, for more
-information, see [https://en.wikipedia.org/max_cut](here).
+information, see [here](https://en.wikipedia.org/max_cut).
 
 The problem is defined on a graph
 ```python
