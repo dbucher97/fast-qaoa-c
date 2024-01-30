@@ -25,6 +25,9 @@ class Statevector(C.Structure):
     def from_numpy(arr: np.ndarray) -> "Statevector":
         ...
 
+    def sample(self, num: int) -> np.ndarray:
+        ...
+
 _lib.sv_make_plus_state.argtypes = [C.c_uint8]
 _lib.sv_make_plus_state.restype = C.POINTER(Statevector)
 
@@ -64,3 +67,18 @@ def __from_numpy(arr):
     return _lib.sv_copy_from(arr, n_qubits).contents
 
 Statevector.from_numpy = __from_numpy
+
+
+_lib.sv_sample.argtypes = [C.POINTER(Statevector), C.c_int, ndpointer(np.uint32)]
+_lib.sv_sample.restype = None
+
+def __sample(self, num: int):
+    ret = np.empty(num, dtype=np.uint32)
+    _lib.sv_sample(self, num, ret)
+    return ret
+
+Statevector.sample = __sample
+
+
+
+

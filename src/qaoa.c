@@ -123,9 +123,11 @@ void qaoa_inner(statevector_t *sv, frx_plan_t *plan, const int depth,
                 const diagonals_t *dg, const real *betas, const real *gammas) {
   cmplx val = 1 / sqrt(1 << sv->n_qubits);
   for (size_t i = 0; i < 1 << sv->n_qubits; i++) {
-    sv->data[i] = 0;
+    sv->data[i] = val;
   }
-  sv->data[0] = 1;
+
+  // Just for testing purposes
+  // sv->data[0] = 1;
 
   // // For infeasiblility preselection.
   // size_t n_feas = 0;

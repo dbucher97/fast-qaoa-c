@@ -1,8 +1,10 @@
-from typing import List
+from typing import List, Union
 from numpy.ctypeslib import ndpointer
 import numpy as np
 import qubovert as qv
 from functools import partial
+
+from .statevector import Statevector
 
 from .lib import _lib, C, NP_REAL
 
@@ -73,10 +75,10 @@ class Diagonals(C.Structure):
     def __ge__(self, other: float):  # pyright: ignore
         ...
 
-    def __lt__(self, other: float): # pyright: ignore
+    def __lt__(self, other: float):  # pyright: ignore
         ...
 
-    def __gt__(self, other: float): # pyright: ignore
+    def __gt__(self, other: float):  # pyright: ignore
         ...
 
     def __eq__(self, other: float):  # pyright: ignore
@@ -91,10 +93,10 @@ class Diagonals(C.Structure):
     def clone(self) -> "Diagonals":
         ...
 
-    def __iadd__(self, other: float) -> "Diagonals": # pyright: ignore
+    def __iadd__(self, other: float) -> "Diagonals":  # pyright: ignore
         ...
 
-    def __imul__(self, other: float) -> "Diagonals": # pyright: ignore
+    def __imul__(self, other: float) -> "Diagonals":  # pyright: ignore
         ...
 
     def __mul__(self, other: float):
@@ -116,9 +118,13 @@ class Diagonals(C.Structure):
     def __truediv__(self, other: float):
         return self.__mul__(1 / other)
 
-    def scale_between_sym(self, bound: float = 1.):
+    def scale_between_sym(self, bound: float = 1.0):
         scale = max(abs(self.min_val), abs(self.max_val))
         return self * (bound / scale)
+
+    def expec(self, samples: Union[np.ndarray, Statevector]):
+        ...
+
 
 _lib.dg_print.argtypes = [C.POINTER(Diagonals)]
 _lib.dg_print.restype = None
@@ -228,6 +234,7 @@ _lib.dg_cmp.restype = C.POINTER(Diagonals)
 def __cmp(lhs, rhs, typ=0):
     return _lib.dg_cmp(lhs, rhs, typ).contents
 
+
 Diagonals.cmp = __cmp
 Diagonals.__le__ = lambda self, other: __cmp(self, other, Diagonals.LTE)
 Diagonals.__ge__ = lambda self, other: __cmp(self, other, Diagonals.GTE)
@@ -246,19 +253,59 @@ _lib.dg_shift.restype = None
 _lib.dg_clone.argtypes = [C.POINTER(Diagonals)]
 _lib.dg_clone.restype = C.POINTER(Diagonals)
 
+
 def __clone(self):
     return _lib.dg_clone(self).contents
+
+
 Diagonals.clone = __clone
+
 
 def __mul(self, other):
     _lib.dg_scale(self, other)
     return self
+
+
 Diagonals.__imul__ = __mul
 Diagonals.__mul = __mul
+
 
 def __add(self, other):
     _lib.dg_shift(self, other)
     return self
+
+
 Diagonals.__iadd__ = __add
 
+_lib.dg_expec_sample.argtypes = [C.POINTER(Diagonals), C.c_int, ndpointer(np.uint32)]
+_lib.dg_expec_sample.restype = C.m_real
 
+
+def __expec_sample(self, samples: np.ndarray):
+    samples = np.array(samples).astype(np.uint32)
+    return _lib.dg_expec_sample(self, len(samples), samples)
+
+
+_lib.sv_expec.argtypes = [
+    C.POINTER(Statevector),
+    C.POINTER(Statevector),
+    C.POINTER(Diagonals),
+    C.POINTER(C.m_real),
+]
+_lib.sv_expec.restype = None
+
+
+def __expec_sv(self, sv: Statevector):
+    res = C.m_real(0)
+    _lib.sv_expec(sv, sv, self, res)
+    return res.value
+
+
+def __expec(self, obj: Union[np.ndarray, Statevector]):
+    if isinstance(obj, Statevector):
+        return __expec_sv(self, obj)
+    else:
+        return __expec_sample(self, obj)
+
+
+Diagonals.expec = __expec

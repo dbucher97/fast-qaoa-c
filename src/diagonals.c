@@ -90,8 +90,8 @@ diagonals_t *dg_brute_force(uint8_t n_qubits, int polylen, uint64_t *polykeys,
   return dg;
 }
 
-diagonals_t *dg_mask(diagonals_t *dg, diagonals_t *lhs, real rhs,
-                     cmp_kind cmp, real val) {
+diagonals_t *dg_mask(diagonals_t *dg, diagonals_t *lhs, real rhs, cmp_kind cmp,
+                     real val) {
   diagonals_t *ret = dg_malloc(dg->n_qubits);
 
   bool cmp_ok;
@@ -198,3 +198,12 @@ void dg_shift(diagonals_t *diags, real f) {
   diags->max_val += f;
 }
 
+real dg_expec_sample(const diagonals_t *diags, const int num,
+                     const uint32_t *samples) {
+  real res = 0;
+
+  for (int i = 0; i < num; i++) {
+    res += diags->data[samples[i]];
+  }
+  return res / (real)num;
+}

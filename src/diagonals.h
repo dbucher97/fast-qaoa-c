@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stdlib.h>
 #include "mtypes.h"
 
 #ifndef _DIAGONALS
@@ -47,5 +48,7 @@ diagonals_t *dg_cmp(diagonals_t *lhs, real rhs, cmp_kind cmp);
 
 void dg_shift(diagonals_t *diags, real f);
 void dg_scale(diagonals_t *diags, real f);
+
+real dg_expec_sample(const diagonals_t *diags, const int num, const uint32_t* samples);
 
 #endif
