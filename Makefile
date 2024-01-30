@@ -2,6 +2,7 @@ INC_DIR = ./src
 SRC_DIR = ./src
 
 BUILD_DIR = ./build
+DEST_DIR = ./fastqaoa/ctypes
 
 
 CFLAGS ?= -I$(INC_DIR) -O3 -march=native -mtune=native
@@ -25,16 +26,18 @@ SRCS := $(shell find $(SRC_DIR) -name *.c)
 OBJS := $(SRCS:%.c=$(BUILD_DIR)/%64.o)
 OBJS32 := $(SRCS:%.c=$(BUILD_DIR)/%32.o)
 
-all: $(BUILD_DIR)/$(TARGET) $(BUILD_DIR)/$(TARGET32)
+all: $(DEST_DIR)/$(TARGET) $(DEST_DIR)/$(TARGET32)
 
-$(BUILD_DIR)/$(TARGET): $(OBJS)
+$(DEST_DIR)/$(TARGET): $(OBJS)
+	@$(MKDIR_P) $(dir $@)
 	$(CC) $(OBJS) $(DYLIB) -o $@ $(LDFLAGS) -llbfgs
 
 $(BUILD_DIR)/%64.o: %.c
 	@$(MKDIR_P) $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(BUILD_DIR)/$(TARGET32): $(OBJS32)
+$(DEST_DIR)/$(TARGET32): $(OBJS32)
+	@$(MKDIR_P) $(dir $@)
 	$(CC) $(OBJS32) $(DYLIB) -o $@ $(LDFLAGS) -llbfgs
 
 $(BUILD_DIR)/%32.o: %.c
@@ -46,5 +49,7 @@ $(BUILD_DIR)/%32.o: %.c
 
 clean:
 	$(RM) -r $(BUILD_DIR)
+	$(RM) $(DEST_DIR)/$(TARGET)
+	$(RM) $(DEST_DIR)/$(TARGET32)
 
 MKDIR_P = mkdir -p

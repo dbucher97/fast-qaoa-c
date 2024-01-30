@@ -1,6 +1,5 @@
 #include "qaoa.h"
 #include "qpe_qaoa.h"
-#include <math.h>
 
 #define TOL 1e-8
 
@@ -23,6 +22,7 @@ metrics_t *mtr_compute(const statevector_t *sv, const diagonals_t *cost,
                        const diagonals_t *constr) {
   metrics_t *metrics = (metrics_t *)malloc(sizeof(metrics_t));
   real p, c;
+  metrics->energy = 0;
   metrics->approx_ratio = 0;
   metrics->feas_ratio = 0;
   metrics->feas_approx_ratio = 0;
@@ -31,11 +31,14 @@ metrics_t *mtr_compute(const statevector_t *sv, const diagonals_t *cost,
   metrics->p_99 = 0;
   metrics->p_9 = 0;
   metrics->rnd_val = 0;
+  metrics->rnd_approx_ratio = 0;
   size_t icost = 0;
+  const size_t cost_size = (1 << cost->n_qubits);
+
   for (size_t i = 0; i < 1 << sv->n_qubits; i++) {
     p = creal(sv->data[i]) * creal(sv->data[i]) +
         cimag(sv->data[i]) * cimag(sv->data[i]);
-    icost = i % (1 << cost->n_qubits);
+    icost = i % cost_size;
     c = cost->data[icost] / cost->min_val;
     metrics->energy += p * cost->data[icost];
     metrics->approx_ratio += p * c;

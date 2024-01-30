@@ -1,8 +1,6 @@
-from typing import List, Union
+from typing import Dict, List, Union
 from numpy.ctypeslib import ndpointer
 import numpy as np
-import qubovert as qv
-from functools import partial
 
 from .statevector import Statevector
 
@@ -44,12 +42,12 @@ class Diagonals(C.Structure):
     ) -> "Diagonals":
         ...
 
-    def brute_force_qv(model: qv.PUBO) -> "Diagonals":
+    def brute_force_hamiltonian(N: int, model: Dict) -> "Diagonals":
         b = {sum(1 << i for i in k) if len(k) > 0 else 0: v for k, v in model.items()}
         keys = list(b.keys())
         vals = list(b.values())
 
-        return Diagonals.brute_force(model.num_binary_variables, keys, vals)
+        return Diagonals.brute_force(N, keys, vals)
 
     def mask(
         self,

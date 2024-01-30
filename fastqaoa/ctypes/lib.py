@@ -23,8 +23,8 @@ elif platform == "darwin":
 else:
     raise RuntimeError(f"Platform {platform} not supported.")
 
-path = Path(__file__).absolute().parent.parent.parent
-_lib = C.CDLL(path / "build" / f"{__libname}.{__ext}")
+path = Path(__file__).absolute().parent
+_lib = C.CDLL(path / f"{__libname}.{__ext}")
 del path
 
 __all__ = ["_lib", "C", "NP_REAL", "NP_COMPLEX"]

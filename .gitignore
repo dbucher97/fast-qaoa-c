@@ -1,5 +1,8 @@
 build/
 backup/
+dist/
 .ipynb_checkpoints/
 __pycache__/
+*.dylib
+*.so
 

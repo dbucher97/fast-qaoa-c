@@ -1,40 +1,50 @@
-import qubovert as qv
-from fastqaoa.ctypes import Diagonals
-from fastqaoa.ctypes.qaoa import qaoa
-from fastqaoa.ctypes.optimize import optimize_qaoa_lbfgs
+import networkx as nx
 import numpy as np
 
-# replica of the hamiltonian
-puso = qv.PUSO(
-    {
-        (0,): 0.5,
-        (1,): 0.5,
-        (2,): 1.25,
-        (3,): -0.25,
-        (0, 1): 0.75,
-        (0, 2): 0.75,
-        (1, 2): 0.75,
-        (2, 3): 0.75,
-    }
-)
+G = nx.erdos_renyi_graph(6, 0.5, seed=8001)
 
-b = puso.to_pubo()
+terms = {e: 2. for e in G.edges()}
+terms.update({(v,): -float(G.degree(v)) for v in G.nodes()})
 
-b = {sum(1 << i for i in k) if len(k) > 0 else 0: v for k,v in b.items()}
-keys = list(b.keys())
-vals = list(b.values())
+###################
 
-dg = Diagonals.brute_force(4, keys, vals)
+from fastqaoa import Diagonals
 
-betas = np.ones(5) * 0.1
-gammas = np.ones(5) * 0.1
+dg = Diagonals.brute_force_hamiltonian(6, terms)
+print(dg.to_numpy())
 
-a = np.abs(qaoa(dg, betas, gammas).to_numpy()) ** 2
-a = a.dot(dg.to_numpy())
+from fastqaoa import qaoa
 
-_, betas, gammas = optimize_qaoa_lbfgs(dg, dg, betas, gammas, maxiter=10)
+betas = [0.9, 0.5, 0.1]
+gammas = [0.1, 0.5, 0.9]
 
-b = np.abs(qaoa(dg, betas, gammas).to_numpy()) ** 2
-b = b.dot(dg.to_numpy())
+sv = qaoa(dg, betas, gammas)
 
-assert b < a
+print(dg.expec(sv))
+
+samples = sv.sample(100)
+
+# The expectation value can also be computed form the samples
+print(dg.expec(samples)) 
+
+
+from fastqaoa import grad_qaoa
+
+val, grad_betas, grad_gammas = grad_qaoa(dg, dg, betas, gammas)
+print(val, grad_betas, grad_gammas)
+
+
+from fastqaoa import optimize_qaoa_lbfgs
+
+res = optimize_qaoa_lbfgs(dg, dg, betas, gammas)
+
+print(res)
+
+
+from fastqaoa import Metrics
+
+sv = qaoa(dg, res.betas, res.gammas)
+print(dg.expec(sv))
+metrics = Metrics.compute(sv, dg, Diagonals.from_numpy(np.ones(1 << 6)))
+
+print(metrics.dump())
