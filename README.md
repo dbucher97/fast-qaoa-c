@@ -147,7 +147,7 @@ print(metrics.dump())
 
 ## Benchmarks
 
-Fast-QAOA is currently only focused on single core performance (multi-core yet to come
+Fast-QAOA is currently only focused on single-core performance (multi-core is yet to come
 but no focus). The benchmarks are run against
 [QOKit](https://github.com/jpmorganchase/QOKit),
 [Qiskit](https://www.ibm.com/quantum/qiskit) (Aer Statevector simulator) and
@@ -155,11 +155,15 @@ but no focus). The benchmarks are run against
 single-core only. The Benchmarks are run on an Apple M1 Mac, Fast-QAOA and QOKit were
 compiled with Apple Clang with optimization level O3.
 
-First, lets compare simulation time (left: including brute forcing, right: without brute
-force) at QAOA depth 6.
+First, let's compare simulation time (left: including brute forcing, right: without brute
+force) at QAOA depth 6:
 
-<img src="assets/p6_comp.png"  />
-<img src="assets/p6_comp_tot_time.png"  />
+<img src="assets/p6_comp_tot_time.png" width="49%" /><img src="assets/p6_comp.png" width="49%"  />
+
+as apparent Fast-QAOA performs the fastest out of all. However, in pure simulation time, QOKit is on par with Fast-QAOA.
+The full circuit simulators are considerably worse in comparison. Let's look at simulation time w.r.t. layer depth at size 24.
+
+<img src="assets/n24_comp.png" width="50%" />
 
 ## Notes on documentation
 
