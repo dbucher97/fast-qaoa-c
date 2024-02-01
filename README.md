@@ -160,10 +160,23 @@ force) at QAOA depth 6:
 
 <img src="assets/p6_comp_tot_time.png" width="49%" /><img src="assets/p6_comp.png" width="49%"  />
 
-as apparent Fast-QAOA performs the fastest out of all. However, in pure simulation time, QOKit is on par with Fast-QAOA.
-The full circuit simulators are considerably worse in comparison. Let's look at simulation time w.r.t. layer depth at size 24.
+As apparent, Fast-QAOA performs the fastest out of all. However, in pure simulation time, QOKit is on par with Fast-QAOA.
+The full circuit simulators are considerably worse in comparison. Let's look at simulation time wrt. layer depth at size 24:
 
 <img src="assets/n24_comp.png" width="50%" />
+
+As expected, the simulation time grows linearly, with QOKit and Fast-QAOA exhibiting similar performance.
+
+
+### A look at gradients
+
+Unlike QOKit, Fast-QAOA allows for gradient computation based on the adjoint method. 
+Pennylane's Lightning simulator also estimates gradients through the same method.
+Therefore, we here benchmark gradients of the two methods
+
+<img src="assets/p6_grad_comp.png" width="49%" /><img src="assets/n18_grad_comp.png" width="49%"  />
+
+
 
 ## Notes on documentation
 
