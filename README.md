@@ -145,6 +145,22 @@ print(metrics.dump())
 # {'energy': -5.6047058, 'approx_ratio': 0.9341176, 'p_opt': 0.713482, ...}
 ```
 
+## Benchmarks
+
+Fast-QAOA is currently only focused on single core performance (multi-core yet to come
+but no focus). The benchmarks are run against
+[QOKit](https://github.com/jpmorganchase/QOKit),
+[Qiskit](https://www.ibm.com/quantum/qiskit) (Aer Statevector simulator) and
+[Pennylane](https://pennylane.ai/) (Lightning CPU). All simulators are set to use
+single-core only. The Benchmarks are run on an Apple M1 Mac, Fast-QAOA and QOKit were
+compiled with Apple Clang with optimization level O3.
+
+First, lets compare simulation time (left: including brute forcing, right: without brute
+force) at QAOA depth 6.
+
+<img src="assets/p6_comp.png"  />
+<img src="assets/p6_comp_tot_time.png"  />
+
 ## Notes on documentation
 
 The documentation is, unfortunately, so far very tenuous. Any user of the library should
