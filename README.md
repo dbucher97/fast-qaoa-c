@@ -174,9 +174,9 @@ Unlike QOKit, Fast-QAOA allows for gradient computation based on the adjoint met
 Pennylane's Lightning simulator also estimates gradients through the same method.
 Therefore, we here benchmark gradients of the two methods
 
-<img src="assets/p6_grad_comp.png" width="49%" /><img src="assets/n18_grad_comp.png" width="49%"  />
+<img src="assets/p6_gradient_comp.png" width="49%" /><img src="assets/n18_grad_comp.png" width="49%"  />
 
-
+Fast-QAOA is orders of magnitude faster than Pennylane, allowing for fast, exact, optimization of QAOA parameters in 
 
 ## Notes on documentation
 
