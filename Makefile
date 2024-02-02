@@ -22,7 +22,6 @@ else
 CFLAGS += -I/usr/local/include/
 LDFLAGS += -L/usr/local/lib/
 endif
-CFLAGS += -I
 TARGET = libqaoa.dylib
 TARGET32 = libqaoa32.dylib
 DYLIB = -dynamiclib
