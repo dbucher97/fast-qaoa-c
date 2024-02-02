@@ -14,8 +14,15 @@ TARGET32 = libqaoa32.so
 DYLIB = -shared
 CFLAGS += -fPIC
 else
+ARCH = $(shell arch)
+ifeq ($(ARCH),arm64)
 CFLAGS += -I/opt/homebrew/include/
 LDFLAGS += -L/opt/homebrew/lib/
+else
+CFLAGS += -I/usr/local/include/
+LDFLAGS += -L/usr/local/lib/
+endif
+CFLAGS += -I
 TARGET = libqaoa.dylib
 TARGET32 = libqaoa32.dylib
 DYLIB = -dynamiclib
@@ -45,7 +52,7 @@ $(BUILD_DIR)/%32.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@ -DUSE_FLOAT32
 
 
-.PHONY: clean
+.PHONY: all clean test
 
 clean:
 	$(RM) -r $(BUILD_DIR)
