@@ -118,8 +118,8 @@ diagonals_t *dg_quad_penalty(diagonals_t *dg, diagonals_t *lhs, real rhs,
 
   // auto penalty
   if (*penalty < 0) {
-    real scnd_min_val = INFINITY;
-    real min_val = INFINITY;
+    real scnd_min_val = dg->max_val + 1;
+    real min_val = dg->max_val + 1;
     for (size_t i = 0; i < 1 << dg->n_qubits; i++) {
       FEASIBLE
       if (cmp_ok) {
@@ -132,7 +132,7 @@ diagonals_t *dg_quad_penalty(diagonals_t *dg, diagonals_t *lhs, real rhs,
       }
     }
 
-    if (scnd_min_val == INFINITY)
+    if (scnd_min_val > dg->max_val)
       scnd_min_val = 0;
 
     *penalty = 0.;

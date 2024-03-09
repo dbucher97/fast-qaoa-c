@@ -197,7 +197,10 @@ def run_default(instance: ProblemBase, run: Experiment, exp: ExperimentCollectio
     else:
         cost = getattr(instance, run.cost.value)()
 
+    # c, _ = instance.diagonalized()
     scale = max(abs(dg.min_val), abs(dg.max_val))
+    # scale = max(abs(c.min_val), abs(c.max_val))
+
     dg = dg * dg.n_qubits / scale
 
     _, weights = instance.diagonalized()
