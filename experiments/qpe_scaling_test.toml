@@ -1,12 +1,12 @@
 n_workers = 4
 
 [qpe_scaling]
-problem = "IntegerKnapsack"
+problem = "Knapsack"
 gamma_scale = 0.1
 beta_scale= 0.1
 
-sizes = [6, 8, 10, 12, 14, 16]
-instances = 256
+sizes = [6, 8, 10, 12, 16]
+instances = 64
 depths = [1, 2, 3, 4, 5, 6, 7, 9, 11, 14, 16, 21, 27, 32, 41, 51, 64]
 
 [[qpe_scaling.qaoa]]
