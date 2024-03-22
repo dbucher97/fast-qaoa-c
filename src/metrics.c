@@ -1,5 +1,6 @@
 #include "qaoa.h"
 #include "qpe_qaoa.h"
+#include <math.h>
 
 #define TOL 1e-8
 
@@ -47,16 +48,17 @@ metrics_t *mtr_compute(const statevector_t *sv, const diagonals_t *cost,
       metrics->feas_ratio += p;
       metrics->feas_approx_ratio += p * c;
     }
-    if (1 - c < TOL) {
+    real abs_val = fabs(1 - c);
+    if (abs_val < TOL) {
       metrics->p_opt += p;
     }
-    if (1 - c < 1e-3) {
+    if (abs_val < 1e-3) {
       metrics->p_999 += p;
     }
-    if (1 - c < 1e-2) {
+    if (abs_val < 1e-2) {
       metrics->p_99 += p;
     }
-    if (1 - c < 1e-1) {
+    if (abs_val < 1e-1) {
       metrics->p_9 += p;
     }
     metrics->rnd_val += cost->data[icost];
