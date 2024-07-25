@@ -1,9 +1,9 @@
 #! /usr/bin/env sh
 
-ONEAPI=/opt/intel/oneapi
+ONEAPI=/home/bucher/intel/oneapi
 source $ONEAPI/setvars.sh
 
-ICX=$ONEAPI/compiler/latest/linux
+ICX=$ONEAPI/compiler/latest
 MKL=$ONEAPI/mkl/latest
 
 export CFLAGS="-I$MKL/include -I$ICX/include"
