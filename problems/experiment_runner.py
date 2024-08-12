@@ -1,9 +1,10 @@
 from concurrent.futures import Future, ThreadPoolExecutor
+from dataclasses import asdict
 import sys
 from time import perf_counter
 import itertools
-import time
 
+import importlib
 
 import numpy as np
 import pandas as pd
@@ -19,7 +20,17 @@ from fastqaoa.ctypes.qaoa import qaoa
 from fastqaoa.ctypes.qpe_qaoa import qpe_qaoa
 from fastqaoa.indicator import get_indicator_interpolator, interpolate_diagonals
 
-from problems.experiment_structure import *
+from problems import ALL_PROBLEMS
+from problems import experiment_structure
+from problems.experiment_structure import (
+    CostKind,
+    Experiment,
+    ExperimentCollection,
+    InitialConditions,
+    QAOAKind,
+    QuadPenaltyCostSettings,
+    aslist,
+)
 from problems.problem import ProblemBase
 
 __interpolators = {}
@@ -336,7 +347,8 @@ def run_experiment(exp: ExperimentCollection, num_workers: int = 4):
 
 def parse_settings(exp: ExperimentCollection):
     for run in exp.qaoa:
-        SettingsObj = globals().get(run.kind.name + "Settings")
+        settings_obj = run.kind.name + "Settings"
+        SettingsObj = getattr(experiment_structure, settings_obj)
         if run.settings is not None:
             run.settings_obj = SettingsObj(**run.settings)
         else:

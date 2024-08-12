@@ -1,0 +1,52 @@
+n_workers = 1
+
+[eval_int_main2_qpe]
+problem = "IntegerKnapsack"
+input_data = "int_main2"
+input_kind = "masked_cost"
+
+[[eval_int_main2_qpe.qaoa]]
+kind = "masked_cost"
+cost = "masked_cost"
+
+[[eval_int_main2_qpe.qaoa]]
+kind = "qpe"
+cost = "masked_cost"
+settings = {"ancilla" = 2, "shift" = 0.6}
+
+[[eval_int_main2_qpe.qaoa]]
+kind = "qpe"
+cost = "masked_cost"
+settings = {"ancilla" = 4, "shift" = 0.6}
+
+[[eval_int_main2_qpe.qaoa]]
+kind = "qpe"
+cost = "masked_cost"
+settings = {"ancilla" = 6, "shift" = 0.6}
+
+[[eval_int_main2_qpe.qaoa]]
+kind = "qpe"
+cost = "masked_cost"
+settings = {"ancilla" = 8, "shift" = 0.6}
+
+[[eval_int_main2_qpe.qaoa]]
+kind = "qpe"
+cost = "masked_cost"
+settings = {"ancilla" = 10, "shift" = 0.6}
+
+[[eval_int_main2_qpe.qaoa]]
+kind = "qpe"
+cost = "masked_cost"
+settings = {"ancilla" = 12, "shift" = 0.6}
+
+[[eval_int_main2_qpe.qaoa]]
+kind = "qpe"
+cost = "masked_cost"
+settings = {"ancilla" = 14, "shift" = 0.6}
+
+[[eval_int_main2_qpe.qaoa]]
+kind = "qpe"
+cost = "masked_cost"
+settings = {"ancilla" = 16, "shift" = 0.6}
+
+
