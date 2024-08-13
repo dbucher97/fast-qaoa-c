@@ -1,4 +1,4 @@
-n_workers = 1
+n_workers = 24
 
 [eval_int_main2_qpe]
 problem = "IntegerKnapsack"
