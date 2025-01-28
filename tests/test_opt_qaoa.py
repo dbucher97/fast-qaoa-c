@@ -113,12 +113,13 @@ def test_opt_qaoa_min_vertex_cover2():
         for beta, gamma in zip(betas, gammas):
             qml.qaoa.cost_layer(gamma, cost_h)
             qml.qaoa.mixer_layer(beta, mixer_h)
-        return qml.expval(cost_h)
+        return qml.expval(-cost_h)
 
     opt = qml.AdamOptimizer(beta2=0.999)
 
     for _ in range(10):
         (tbetas, tgammas), _ = opt.step_and_cost(circuit, tbetas, tgammas)
+
     cost = circuit(tbetas, tgammas)
 
     # replica of the hamiltonian:
@@ -145,8 +146,10 @@ def test_opt_qaoa_min_vertex_cover2():
 
     res = optimize_qaoa_adam(dg, dg, betas, gammas, maxiter=10)
 
-    b = np.abs(qaoa(dg, res.betas, res.gammas).to_numpy()) ** 2
-    cost2 = b.dot(dg.to_numpy())
+
+    b = qaoa(dg, res.betas, res.gammas)
+    cost2 = dg.expec(b)
+    print(cost, cost2)
 
     atol = 1e-8
     if NP_REAL == np.float32:

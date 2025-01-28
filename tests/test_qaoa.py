@@ -62,7 +62,7 @@ def test_apply_rx():
 
     @qml.qnode(dev, interface="jax")
     def circuit():
-        qml.QubitStateVector(npsv, range(N))
+        qml.StatePrep(npsv, range(N))
         for i in range(N):
             qml.RX(2 * beta, wires=i)
         return qml.state()
@@ -217,14 +217,14 @@ def test_qaoa_min_vertex_cover():
     # replica of the hamiltonian
     puso = qv.PUSO(
         {
-            (0,): 0.5,
-            (1,): 0.5,
-            (2,): 1.25,
-            (3,): -0.25,
-            (0, 1): 0.75,
-            (0, 2): 0.75,
-            (1, 2): 0.75,
-            (2, 3): 0.75,
+            (0,): -0.5,
+            (1,): -0.5,
+            (2,): -1.25,
+            (3,): 0.25,
+            (0, 1): -0.75,
+            (0, 2): -0.75,
+            (1, 2): -0.75,
+            (2, 3): -0.75,
         }
     )
     b = puso.to_pubo()

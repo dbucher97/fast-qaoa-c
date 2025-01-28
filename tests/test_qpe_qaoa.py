@@ -144,7 +144,7 @@ def test_qpe_qaoa():
 
     @qml.qnode(dev, interface="jax")
     def layer(state, gamma, beta):
-        qml.QubitStateVector(state, wires=range(N + M))
+        qml.StatePrep(state, wires=range(N + M))
         apply_gamma(gamma)
         for w in wires:
             qml.RX(2 * beta, w)
@@ -194,7 +194,7 @@ def test_grad_qpe_qaoa():
 
     @qml.qnode(dev, interface="jax")
     def layer(state, gamma, beta):
-        qml.QubitStateVector(state, wires=range(N + M))
+        qml.StatePrep(state, wires=range(N + M))
         apply_gamma(gamma)
         for w in wires:
             qml.RX(2 * beta, w)
