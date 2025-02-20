@@ -1,34 +1,34 @@
-n_workers = 96
+n_workers = 20
 
-[qpe_main]
+[qpe_main2]
 problem = "Knapsack"
 gamma_scale = 0.1
 beta_scale= 0.1
 
 sizes = [6, 8, 10, 12, 14, 16, 18, 20, 22]
-instances = 64
-depths = [1, 2, 4, 8, 16]
+instances = 128
+depths = [1, 2, 3, 4, 6, 8, 12, 16, 24, 32]
 
 
-[[qpe_main.qaoa]]
-kind = "qpe"
-settings = {"ancilla" = 2, "shift" = 0.6}
+# [[qpe_main2.qaoa]]
+# kind = "qpe"
+# settings = {"ancilla" = 2, "shift" = 0.6}
+#
+# [[qpe_main2.qaoa]]
+# kind = "qpe"
+# settings = {"ancilla" = 4, "shift" = 0.6}
+#
+# [[qpe_main2.qaoa]]
+# kind = "qpe"
+# settings = {"ancilla" = 8, "shift" = 0.6}
+#
+# [[qpe_main2.qaoa]]
+# kind = "qpe"
+# settings = {"ancilla" = 16, "shift" = 0.6}
 
-[[qpe_main.qaoa]]
-kind = "qpe"
-settings = {"ancilla" = 4, "shift" = 0.6}
-
-[[qpe_main.qaoa]]
-kind = "qpe"
-settings = {"ancilla" = 8, "shift" = 0.6}
-
-[[qpe_main.qaoa]]
-kind = "qpe"
-settings = {"ancilla" = 16, "shift" = 0.6}
-
-[[qpe_main.qaoa]]
+[[qpe_main2.qaoa]]
 kind = "masked_cost"
 
-[[qpe_main.qaoa]]
-kind = "kickback_cost"
-cost = "masked_cost"
+# [[qpe_main.qaoa]]
+# kind = "kickback_cost"
+# cost = "masked_cost"

@@ -109,5 +109,6 @@ def multi_energy(
     assert betas.shape == gammas.shape, "Betas and Gammas must have identical shape"
     assert len(betas.shape) == 2, "Betas and Gammas must be two-dimensional"
     res = np.empty(betas.shape[0], dtype=NP_REAL)
+    print(betas.shape)
     _lib.multi_energy(*betas.shape, dg, cost, betas, gammas, res)
     return res

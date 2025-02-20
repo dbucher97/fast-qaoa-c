@@ -1,0 +1,3 @@
+N   number of items / qubits
+k   number of constraints
+M   number of ancillary / slack qubits

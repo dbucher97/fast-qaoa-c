@@ -4,6 +4,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+// #include <omp.h>
 
 void apply_diagonals(statevector_t *sv, const diagonals_t *dg,
                      const real gamma) {
@@ -236,3 +237,38 @@ void multi_energy(const int num, const int depth, const diagonals_t *dg,
   sv_free(sv);
   frx_free(plan);
 }
+
+// void multi_energy(const int num, const int depth, const diagonals_t *dg,
+//                   const diagonals_t *cost, const real *betas,
+//                   const real *gammas, real *results) {
+//   // Allocate statevector and plan for each thread
+//   int max_threads = omp_get_max_threads();
+//   statevector_t **sv_array = malloc(max_threads * sizeof(statevector_t *));
+//   frx_plan_t **plan_array = malloc(max_threads * sizeof(frx_plan_t *));
+//
+//   for (int t = 0; t < max_threads; t++) {
+//     sv_array[t] = sv_malloc(dg->n_qubits);
+//     plan_array[t] = frx_make_plan(sv_array[t], RDX4);
+//   }
+//
+// #pragma omp parallel for
+//   for (int i = 0; i < num; i++) {
+//     int thread_id = omp_get_thread_num();
+//     statevector_t *local_sv = sv_array[thread_id];
+//     frx_plan_t *local_plan = plan_array[thread_id];
+//     cmplx res;
+//
+//     qaoa_inner(local_sv, local_plan, depth, dg, betas + i * depth,
+//                gammas + i * depth);
+//     sv_expec(local_sv, local_sv, cost, &res);
+//     results[i] = creal(res);
+//   }
+//
+//   // Clean up
+//   for (int t = 0; t < max_threads; t++) {
+//     sv_free(sv_array[t]);
+//     frx_free(plan_array[t]);
+//   }
+//   free(sv_array);
+//   free(plan_array);
+// }

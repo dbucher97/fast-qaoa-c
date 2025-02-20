@@ -6,8 +6,8 @@
 #define EPS 1e-6
 
 void apply_qpe_diagonals_normalized(statevector_t *sv, const diagonals_t *dg,
-                                    const diagonals_t *constr,
-                                    const real gamma, real *psum) {
+                                    const diagonals_t *constr, const real gamma,
+                                    real *psum) {
   cmplx buf;
   real norm;
   *psum = 0;
@@ -33,8 +33,9 @@ void apply_qpe_diagonals(statevector_t *sv, const diagonals_t *dg,
 
 void qpe_qaoa_inner_normalized(statevector_t *sv, frx_plan_t *plan,
                                const int depth, const diagonals_t *dg,
-                               const diagonals_t *constr, real *betas,
-                               real *gammas, real *psucc) {
+                               const diagonals_t *constr, const real *betas,
+                               const real *gammas, real *psucc,
+                               real *psucc_array) {
   cmplx val = 1 / sqrt(1 << sv->n_qubits);
   for (size_t i = 0; i < 1 << sv->n_qubits; i++) {
     sv->data[i] = val;
@@ -45,6 +46,9 @@ void qpe_qaoa_inner_normalized(statevector_t *sv, frx_plan_t *plan,
   for (int p = 0; p < depth; p++) {
     apply_qpe_diagonals_normalized(sv, dg, constr, gammas[p], &p_it);
     *psucc *= p_it;
+    if (psucc_array != NULL) {
+      psucc_array[p] = p_it;
+    }
     frx_apply(plan, sv, betas[p]);
   }
 }
@@ -72,6 +76,20 @@ statevector_t *qpe_qaoa(const int depth, const diagonals_t *dg,
   frx_plan_t *plan = frx_make_plan(sv, RDX4);
 
   qpe_qaoa_inner(sv, plan, depth, dg, constr, betas, gammas, psucc);
+
+  frx_free(plan);
+  return sv;
+}
+
+statevector_t *qpe_qaoa_norm(const int depth, const diagonals_t *dg,
+                             const diagonals_t *constr, real *betas,
+                             const real *gammas, real *psucc,
+                             real *psucc_array) {
+  statevector_t *sv = sv_malloc(dg->n_qubits);
+  frx_plan_t *plan = frx_make_plan(sv, RDX4);
+
+  qpe_qaoa_inner_normalized(sv, plan, depth, dg, constr, betas, gammas, psucc,
+                            psucc_array);
 
   frx_free(plan);
   return sv;

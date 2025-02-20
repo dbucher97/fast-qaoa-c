@@ -14,8 +14,9 @@ dependencies = [
     "h5py>=3.12.1",
     "pyarrow>=19.0.0",
     "pandas>=2.2.3",
+    "pydantic>=2.10.6",
 ]
-name = "fast-qaoa"
+name = "fastqaoa"
 version = "0.1.0"
 description = ""
 readme = "README.md"
@@ -24,8 +25,17 @@ readme = "README.md"
 dev = [
     "pytest<8.0.0,>=7.4.2",
     "ipython<9.0.0,>=8.16.1",
-    "jupyterlab<5.0.0,>=4.0.7",
+    "jupyterlab>=4.0.7,<5.0.0",
+    "fastqaoa"
 ]
+
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.pytest.ini_options]
 pythonpath = "."
+
+[tool.uv.sources]
+fastqaoa = { workspace = true }

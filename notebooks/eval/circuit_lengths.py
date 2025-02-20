@@ -4,13 +4,15 @@ import pandas as pd
 
 from problems.experiment_structure import QAOAKind
 
+def ceillog2(x):
+    return int(np.ceil(np.log2(x)))
 
 def get_M_qpe(problem: Knapsack):
     if not isinstance(problem, IntegerKnapsackPisinger) and not isinstance(
         problem, IntegerKnapsack
     ):
         raise ValueError("Cannot automatically infer M from non integer Knapsack")
-    return int(np.ceil(np.log2(np.sum(problem.weights))))
+    return ceillog2(np.sum(problem.weights))
 
 
 def get_M_penalty(problem: Knapsack):
@@ -18,7 +20,7 @@ def get_M_penalty(problem: Knapsack):
         problem, IntegerKnapsack
     ):
         raise ValueError("Cannot automatically infer M from non integer Knapsack")
-    return int(np.ceil(np.log2(problem.max_capacity)))
+    return ceillog2(problem.max_capacity)
 
 
 def circuit_depth_qpe(problem: Knapsack, p: int = 1, M: int = None):
@@ -28,14 +30,13 @@ def circuit_depth_qpe(problem: Knapsack, p: int = 1, M: int = None):
     N = problem.n_qubits
 
     phase = max(M, N)
-    qft = 2 * M
-    cop = N
+    # phase2 = min(N * (1 + 2 * ceillog2(M)), M * (1 + 2 * ceillog2(N)))
+    # print(phase, phase2)
+    qft = 2 * M - 1
+    cop = 2 * ceillog2(N) + 1
 
-    # Hadamard + Measure + Hadamard
-    # Mixer happens while measure
-    measure = 3
 
-    layers = 2 * phase + 2 * qft + cop + measure
+    layers = 2 * phase + 2 * qft + cop # + measure
 
     return p * layers
 
@@ -135,7 +136,6 @@ def add_lengths_to_df(df: pd.DataFrame, problem: Knapsack):
 
         _, constr = prb.diagonalized()
         y = (constr >= 0).to_numpy().sum()
-        prb.decache()
 
         return y / (1 << prb.n_qubits)
 

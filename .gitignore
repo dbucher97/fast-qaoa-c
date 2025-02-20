@@ -8,3 +8,5 @@ __pycache__/
 .DS_Store
 
 *.egg-info/
+
+notebooks/etc/instances/

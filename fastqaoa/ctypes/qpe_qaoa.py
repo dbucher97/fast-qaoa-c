@@ -50,6 +50,7 @@ _lib.qpe_qaoa.argtypes = [
 
 _lib.qpe_qaoa.restype = C.POINTER(Statevector)
 
+
 def qpe_qaoa(dg: Diagonals, constr: Diagonals, betas: List[float], gammas: List[float]):
     gammas = np.array(gammas).astype(NP_REAL)
     betas = np.array(betas).astype(NP_REAL)
@@ -57,6 +58,34 @@ def qpe_qaoa(dg: Diagonals, constr: Diagonals, betas: List[float], gammas: List[
     assert len(gammas) == len(betas), "Betas and Gammas must have same size"
     sv = _lib.qpe_qaoa(len(betas), dg, constr, betas, gammas, psucc).contents
     return sv, psucc.value
+
+
+_lib.qpe_qaoa_norm.argtypes = [
+    C.c_int,
+    C.POINTER(Diagonals),
+    C.POINTER(Diagonals),
+    ndpointer(NP_REAL),
+    ndpointer(NP_REAL),
+    C.POINTER(C.m_real),
+    ndpointer(NP_REAL),
+]
+
+_lib.qpe_qaoa_norm.restype = C.POINTER(Statevector)
+
+
+def qpe_qaoa_norm(
+    dg: Diagonals, constr: Diagonals, betas: List[float], gammas: List[float]
+):
+    gammas = np.array(gammas).astype(NP_REAL)
+    betas = np.array(betas).astype(NP_REAL)
+    psucc = C.m_real(0)
+    qvals = np.zeros(len(betas), dtype=NP_REAL)
+    assert len(gammas) == len(betas), "Betas and Gammas must have same size"
+    sv = _lib.qpe_qaoa_norm(
+        len(betas), dg, constr, betas, gammas, psucc, qvals
+    ).contents
+    return sv, psucc.value, qvals
+
 
 _lib.grad_qpe_qaoa.argtypes = [
     C.c_int,
@@ -72,9 +101,14 @@ _lib.grad_qpe_qaoa.argtypes = [
 ]
 _lib.grad_qpe_qaoa.restype = None
 
+
 def grad_qpe_qaoa(
-    dg: Diagonals, cost: Diagonals, constr: Diagonals, betas: List[float], gammas: List[float]
-) -> Tuple[np.ndarray, np.ndarray]:
+    dg: Diagonals,
+    cost: Diagonals,
+    constr: Diagonals,
+    betas: List[float],
+    gammas: List[float],
+) -> Tuple[float, np.ndarray, np.ndarray]:
     gammas = np.array(gammas).astype(NP_REAL)
     betas = np.array(betas).astype(NP_REAL)
     assert len(gammas) == len(betas), "Betas and Gammas must have same size"
@@ -82,8 +116,17 @@ def grad_qpe_qaoa(
     grad_gammas = np.empty_like(gammas)
     psucc = C.m_real(0)
     expectation_value = C.m_real(0)
-    _lib.grad_qpe_qaoa(len(betas), dg, cost, constr, betas, gammas, grad_betas,
-                       grad_gammas, psucc, expectation_value)
+    _lib.grad_qpe_qaoa(
+        len(betas),
+        dg,
+        cost,
+        constr,
+        betas,
+        gammas,
+        grad_betas,
+        grad_gammas,
+        psucc,
+        expectation_value,
+    )
 
-    return grad_betas, grad_gammas
-
+    return expectation_value, grad_betas, grad_gammas

@@ -6,8 +6,8 @@
 #define _QPE_QAOA
 
 void apply_qpe_diagonals_normalized(statevector_t *sv, const diagonals_t *dg,
-                                    const diagonals_t *constr,
-                                    const real gamma, real *psum);
+                                    const diagonals_t *constr, const real gamma,
+                                    real *psum);
 
 void apply_qpe_diagonals(statevector_t *sv, const diagonals_t *dg,
                          const diagonals_t *constr, const real gamma);
@@ -20,6 +20,11 @@ statevector_t *qpe_qaoa(const int depth, const diagonals_t *dg,
                         const diagonals_t *constr, real *betas,
                         const real *gammas, real *psucc);
 
+statevector_t *qpe_qaoa_norm(const int depth, const diagonals_t *dg,
+                             const diagonals_t *constr, real *betas,
+                             const real *gammas, real *psucc,
+                             real *psucc_array);
+
 void grad_qpe_qaoa_inner(statevector_t *sv_left, statevector_t *sv_right,
                          statevector_t *sv_left_p, frx_plan_t *plan, int depth,
                          const diagonals_t *dg, const diagonals_t *cost,
@@ -31,7 +36,6 @@ void grad_qpe_qaoa_inner(statevector_t *sv_left, statevector_t *sv_right,
 void grad_qpe_qaoa(int depth, const diagonals_t *dg, const diagonals_t *cost,
                    const diagonals_t *constr, const real *betas,
                    const real *gammas, real *beta_gradients,
-                   real *gamma_gradients, real *psucc,
-                   real *expectation_value);
+                   real *gamma_gradients, real *psucc, real *expectation_value);
 
 #endif

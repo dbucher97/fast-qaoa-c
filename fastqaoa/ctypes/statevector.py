@@ -28,6 +28,7 @@ class Statevector(C.Structure):
     def sample(self, num: int) -> np.ndarray:
         ...
 
+
 _lib.sv_make_plus_state.argtypes = [C.c_uint8]
 _lib.sv_make_plus_state.restype = C.POINTER(Statevector)
 
