@@ -1,5 +1,6 @@
 #include "qpe_qaoa.h"
 #include "qaoa.h"
+#include "mmath.h"
 #include <math.h>
 #include <stdio.h>
 

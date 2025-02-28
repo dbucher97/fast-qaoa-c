@@ -24,25 +24,21 @@ class Diagonals(C.Structure):
     EQ = 4
     NEQ = 5
 
-    def make_plus_state(n_qubits: int) -> "Diagonals":
-        ...
+    def make_plus_state(n_qubits: int) -> "Diagonals": ...
 
-    def print(self):
-        ...
+    def print(self): ...
 
-    def __del__(self):
-        ...
+    def __del__(self): ...
 
-    def to_numpy(self) -> np.ndarray:
-        ...
+    def to_numpy(self) -> np.ndarray: ...
 
-    def from_numpy(arr: np.ndarray) -> "Diagonals":
-        ...
+    def from_numpy(arr: np.ndarray) -> "Diagonals": ...
 
     def brute_force(
-        n_qubits: int, keys: List[int], vals: List[float]  # pyright: ignore
-    ) -> "Diagonals":
-        ...
+        n_qubits: int,
+        keys: List[int],
+        vals: List[float],  # pyright: ignore
+    ) -> "Diagonals": ...
 
     def brute_force_qv(model: qv.PUBO) -> "Diagonals":
         b = {sum(1 << i for i in k) if len(k) > 0 else 0: v for k, v in model.items()}
@@ -57,8 +53,7 @@ class Diagonals(C.Structure):
         rhs: float,  # pyright: ignore
         cmp_type: int,  # pyright: ignore
         val: float = 0.0,  # pyright: ignore
-    ) -> "Diagonals":
-        ...
+    ) -> "Diagonals": ...
 
     def quad_penalty(
         self,
@@ -66,8 +61,7 @@ class Diagonals(C.Structure):
         rhs: float,  # pyright: ignore
         cmp_type: int,  # pyright: ignore
         penalty: float = None,  # pyright: ignore
-    ) -> "Diagonals":
-        ...
+    ) -> "Diagonals": ...
 
     def __le__(self, other: float):  # pyright: ignore
         ...
@@ -90,8 +84,7 @@ class Diagonals(C.Structure):
     def cmp(self, other: float, typ: int):  # pyright: ignore
         ...
 
-    def clone(self) -> "Diagonals":
-        ...
+    def clone(self) -> "Diagonals": ...
 
     def __iadd__(self, other: float) -> "Diagonals":  # pyright: ignore
         ...
@@ -118,12 +111,20 @@ class Diagonals(C.Structure):
     def __truediv__(self, other: float):
         return self.__mul__(1 / other)
 
-    def scale_between_sym(self, bound: float = 1.0):
-        scale = max(abs(self.min_val), abs(self.max_val))
-        return self * (bound / scale)
+    def scale_between_sym(self, bound: float = 1.0, M: int | None = None):
+        if M is None:
+            scale = max(abs(self.min_val), abs(self.max_val))
+            return self * (bound / scale)
+        else:
+            abs_min = abs(self.min_val)
+            abs_max = abs(self.max_val)
+            if abs_min > abs_max:
+                return self * (bound / abs_min)
+            else:
+                return self * (bound * (1 - 2 / 2 ** M) / abs_max)
 
-    def expec(self, samples: Union[np.ndarray, Statevector]):
-        ...
+
+    def expec(self, samples: Union[np.ndarray, Statevector]): ...
 
 
 _lib.dg_print.argtypes = [C.POINTER(Diagonals)]

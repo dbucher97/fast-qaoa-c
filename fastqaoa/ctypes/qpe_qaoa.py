@@ -37,6 +37,7 @@ def apply_qpe_diagonals(
     sv: Statevector, dg: Diagonals, constr: Diagonals, gamma: float
 ) -> None:
     _lib.apply_qpe_diagonals(sv, dg, constr, gamma)
+    return sv
 
 
 _lib.qpe_qaoa.argtypes = [

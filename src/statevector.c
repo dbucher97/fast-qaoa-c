@@ -118,7 +118,7 @@ void sv_sample(const statevector_t *sv, const int num, uint32_t *res) {
 
   for (size_t i = 1; i < 1 << sv->n_qubits; i++) {
     ip[i].prob += ip[i - 1].prob;
-    printf("%f\n", ip[i].prob);
+    // printf("%f\n", ip[i].prob);
   }
   // make sure last value is exactly 1.
   ip[(1 << sv->n_qubits) - 1].prob = 1.f;
