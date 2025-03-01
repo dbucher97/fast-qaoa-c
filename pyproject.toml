@@ -15,6 +15,7 @@ dependencies = [
     "pyarrow>=19.0.0",
     "pandas>=2.2.3",
     "pydantic>=2.10.6",
+    "tqdm>=4.67.1",
 ]
 name = "fastqaoa"
 version = "0.1.0"
