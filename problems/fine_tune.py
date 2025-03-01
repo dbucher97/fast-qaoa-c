@@ -12,7 +12,7 @@ import time
 
 SHIFT = 0.4
 INTERPOLATORS = {
-    M: get_indicator_interpolator(M, 4, SHIFT) for M in [4, 6, 8, 12, 16]
+    M: get_indicator_interpolator(M, 4, shift=SHIFT) for M in [4, 6, 8, 12, 16]
 }
 
 INSTANCES = Knapsack.get_instances()
@@ -49,6 +49,7 @@ def finetune_instance(x):
             sv, p, q = qpe_qaoa_norm(f, sgn, res.betas, res.gammas)
             new_data = dict(row)
 
+
             new_data.update(Metrics.compute(sv, cost, feas).dump())
             new_data["status"] = res.status.name
             new_data["iterations"] = res.it
@@ -59,6 +60,7 @@ def finetune_instance(x):
             new_data["shift"] = SHIFT
             new_data["p_succ"] = p
             new_data["q_succ"] = q
+            new_data["qaoa"] = "qpe"
 
             ret.append(new_data)
 
