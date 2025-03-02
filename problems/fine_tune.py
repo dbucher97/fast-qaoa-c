@@ -77,8 +77,8 @@ for result in exec.map(finetune_instance, df.groupby(["n_qubits", "problem_id"])
     if len(collected) >= 12 * 24:
         df = pd.concat([df, pd.DataFrame(collected)], ignore_index=True)
         collected = []
-        df.to_feather("results/qpe_main2_ft.feather")
+        df.to_feather("results/qpe_main2_nft.feather")
 
 if len(collected) > 0:
     df = pd.concat([df, pd.DataFrame(collected)], ignore_index=True)
-    df.to_feather("results/qpe_main2_ft.feather")
+    df.to_feather("results/qpe_main2_nft.feather")
