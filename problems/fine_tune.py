@@ -42,20 +42,20 @@ def finetune_instance(x):
         sgn = interpolate_diagonals(interp, g_loc)
         for _, row in data.sort_values(by="depth").iterrows():
             a = perf_counter()
-            res = optimize_qaoa_lbfgs(
-                f, cost, row.betas, row.gammas, constr=sgn, maxiter=5
-            )
+            # res = optimize_qaoa_lbfgs(
+            #     f, cost, row.betas, row.gammas, constr=sgn, maxiter=5
+            # )
             delta = perf_counter() - a
-            sv, p, q = qpe_qaoa_norm(f, sgn, res.betas, res.gammas)
+            sv, p, q = qpe_qaoa_norm(f, sgn, row.betas, row.gammas)
             new_data = dict(row)
 
 
             new_data.update(Metrics.compute(sv, cost, feas).dump())
-            new_data["status"] = res.status.name
-            new_data["iterations"] = res.it
+            # new_data["status"] = res.status.name
+            new_data["iterations"] = 0
             new_data["runtime"] = delta
-            new_data["betas"] = res.betas
-            new_data["gammas"] = res.gammas
+            # new_data["betas"] = res.betas
+            # new_data["gammas"] = res.gammas
             new_data["ancilla"] = M
             new_data["shift"] = SHIFT
             new_data["p_succ"] = p
