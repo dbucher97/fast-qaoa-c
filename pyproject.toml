@@ -1,6 +1,6 @@
 [project]
 authors = [
-    {name = "David Bucher", email = "d.bucher97@gmail.com"},
+    {name = "David Bucher", email = "david.bucher@aqarios.com"},
 ]
 requires-python = "<4.0,>=3.9"
 dependencies = [
@@ -18,7 +18,7 @@ dependencies = [
     "tqdm>=4.67.1",
 ]
 name = "fastqaoa"
-version = "0.1.0"
+version = "0.1.1"
 description = ""
 readme = "README.md"
 

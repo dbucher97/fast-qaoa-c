@@ -26,6 +26,7 @@ SRCS := $(shell find $(SRC_DIR) -name *.c)
 OBJS := $(SRCS:%.c=$(BUILD_DIR)/%64.o)
 OBJS32 := $(SRCS:%.c=$(BUILD_DIR)/%32.o)
 
+.PHONY: all
 all: $(BUILD_DIR)/$(TARGET) $(BUILD_DIR)/$(TARGET32)
 
 $(BUILD_DIR)/$(TARGET): $(OBJS)
@@ -44,7 +45,6 @@ $(BUILD_DIR)/%32.o: %.c
 
 
 .PHONY: clean
-
 clean:
 	$(RM) -r $(BUILD_DIR)
 

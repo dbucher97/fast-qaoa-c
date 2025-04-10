@@ -10,25 +10,6 @@ instances = 128
 depths = [1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48, 64]
 
 
-# [[qpe_main2.qaoa]]
-# kind = "qpe"
-# settings = {"ancilla" = 2, "shift" = 0.6}
-#
-# [[qpe_main2.qaoa]]
-# kind = "qpe"
-# settings = {"ancilla" = 4, "shift" = 0.6}
-#
-# [[qpe_main2.qaoa]]
-# kind = "qpe"
-# settings = {"ancilla" = 8, "shift" = 0.6}
-#
-# [[qpe_main2.qaoa]]
-# kind = "qpe"
-# settings = {"ancilla" = 16, "shift" = 0.6}
-
 [[qpe_main2.qaoa]]
 kind = "masked_cost"
 
-# [[qpe_main.qaoa]]
-# kind = "kickback_cost"
-# cost = "masked_cost"
