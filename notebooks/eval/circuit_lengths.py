@@ -12,7 +12,10 @@ def get_M_qpe(problem: Knapsack):
         problem, IntegerKnapsack
     ):
         raise ValueError("Cannot automatically infer M from non integer Knapsack")
-    return ceillog2(np.sum(problem.weights))
+    min_val = - sum(problem.weights) + problem.max_capacity
+    max_val = problem.max_capacity
+    
+    return max(ceillog2(abs(min_val)), ceillog2(abs(max_val))) + 1
 
 
 def get_M_penalty(problem: Knapsack):
@@ -23,7 +26,7 @@ def get_M_penalty(problem: Knapsack):
     return ceillog2(problem.max_capacity)
 
 
-def circuit_depth_qpe(problem: Knapsack, p: int = 1, M: int = None):
+def layer_depth_qpe(problem: Knapsack, M: int = None):
     if M is None:
         M = get_M_qpe(problem)
 
@@ -38,7 +41,10 @@ def circuit_depth_qpe(problem: Knapsack, p: int = 1, M: int = None):
 
     layers = 2 * phase + 2 * qft + cop # + measure
 
-    return p * layers
+    return layers
+
+def circuit_depth_qpe(problem: Knapsack, p: int = 1, M: int = None):
+    return 1 + p * (layer_depth_qpe(problem, M) + 1)
 
 
 def two_qubit_ops_qpe(problem: Knapsack, p: int = 1, M: int = None):
@@ -53,7 +59,7 @@ def two_qubit_ops_qpe(problem: Knapsack, p: int = 1, M: int = None):
     return p * (2 * phase + 2 * qft + cop)
 
 
-def circuit_depth_penalty(problem: Knapsack, p: int = 1, M: int = None):
+def circuit_depth_penalty_legacy(problem: Knapsack, p: int = 1, M: int = None):
     if M is None:
         M = get_M_penalty(problem)
     N = problem.n_qubits
@@ -69,6 +75,18 @@ def circuit_depth_penalty(problem: Knapsack, p: int = 1, M: int = None):
 
     layers = inter + max(in_main, in_ancilla) + 1
     return 1 + layers * p
+
+def circuit_depth_penalty(problem: Knapsack, p: int = 1, M: int = None):
+    if M is None:
+        M = get_M_penalty(problem)
+    N = problem.n_qubits
+
+    # https://en.wikipedia.org/wiki/Edge_coloring
+    layers = M + N - 1
+    if layers % 2 == 1:
+        layers += 1
+
+    return 1 + p * (2 + layers)
 
 
 def two_qubit_ops_penalty(problem: Knapsack, p: int = 1, M: int = None):
@@ -143,4 +161,4 @@ def add_lengths_to_df(df: pd.DataFrame, problem: Knapsack):
     df["clops"] = df.apply(eval_clops, axis=1)
     df["two_qubit_ops"] = df.apply(eval_two_qubit_ops, axis=1)
     df["weight_ratio"] = df.apply(eval_weight_ratio, axis=1)
-    df["feas_perc"] = df.apply(eval_feas_perc, axis=1)
+    # df["feas_perc"] = df.apply(eval_feas_perc, axis=1)

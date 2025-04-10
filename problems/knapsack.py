@@ -63,8 +63,9 @@ class Knapsack(ProblemBase):
         cost, constr = self.diagonalized()
         if penalty is None and hasattr(self, "_penalty"):
             penalty = self._penalty
-        diag, penalty = cost.quad_penalty(constr, 0, Diagonals.GTE, penalty=penalty)
-        self._penalty = penalty
+        diag, new_penalty = cost.quad_penalty(constr, 0, Diagonals.GTE, penalty=penalty)
+        if penalty is None:
+            self._penalty = new_penalty
         return diag
 
     def quad_penalty_full_problem(self, n_ancilla: int, penalty: float = None):

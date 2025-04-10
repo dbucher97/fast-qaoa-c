@@ -84,8 +84,11 @@ def mpl_reset():
     plt.style.use('default')
 
 
-def shades(num: int, col_idx: int = 0, offset: int = 0):
-    return sns.light_palette(COLORS[col_idx], num + offset)[:num]
+def shades(num: int | None, col_idx: int = 0, offset: int = 0):
+    if num is None:
+        return sns.light_palette(COLORS[col_idx], as_cmap=True)
+    else:
+        return sns.light_palette(COLORS[col_idx], num + offset)[-num:]
 
 def diverging(col_idxs: tuple[int, int] | None, central: str | None = None):
     if col_idxs is None:
