@@ -1,21 +1,21 @@
 n_workers = 24
 
-[int_main2]
+[int_main4]
 problem = "IntegerKnapsack"
 gamma_scale = 0.1
 beta_scale= 0.1
 
 sizes = [6, 8, 10, 12, 14, 16, 18, 20, 22]
 instances = 128
-depths = [1, 2, 3, 4, 6, 8, 12, 16, 24, 32]
+depths = [1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48, 64]
 
-[[int_main2.qaoa]]
-kind = "masked_cost"
+# [[int_main4.qaoa]]
+# kind = "masked_cost"
 
 # [[int_main2.qaoa]]
 # kind = "quad_penalty_cost"
 
-[[int_main2.qaoa]]
+[[int_main4.qaoa]]
 kind = "quad_penalty_cost"
 cost = "masked_cost"
 #
@@ -27,56 +27,56 @@ cost = "masked_cost"
 # kind = "quad_penalty_full_problem"
 # until_size = 16
 
-[[int_main2.qaoa]]
-kind = "quad_penalty_full_problem"
-cost = "masked_cost"
-until_size = 16
+# [[int_main3.qaoa]]
+# kind = "quad_penalty_full_problem"
+# cost = "masked_cost"
+# until_size = 16
 
 
-[[int_main2.qaoa]]
-kind = "qpe"
-cost = "masked_cost"
-until_size = 18
-settings = {"ancilla" = 2, "shift" = 0.6}
-
-[[int_main2.qaoa]]
-kind = "qpe"
-cost = "masked_cost"
-until_size = 18
-settings = {"ancilla" = 4, "shift" = 0.6}
-
-[[int_main2.qaoa]]
-kind = "qpe"
-cost = "masked_cost"
-until_size = 18
-settings = {"ancilla" = 6, "shift" = 0.6}
-
-[[int_main2.qaoa]]
-kind = "qpe"
-cost = "masked_cost"
-until_size = 18
-settings = {"ancilla" = 8, "shift" = 0.6}
-
-[[int_main2.qaoa]]
-kind = "qpe"
-cost = "masked_cost"
-until_size = 18
-settings = {"ancilla" = 12, "shift" = 0.6}
-
-[[int_main2.qaoa]]
-kind = "qpe"
-cost = "masked_cost"
-until_size = 18
-settings = {"ancilla" = 14, "shift" = 0.6}
-
-[[int_main2.qaoa]]
-kind = "qpe"
-cost = "masked_cost"
-until_size = 18
-settings = {"ancilla" = 16, "shift" = 0.6}
-
-[[int_main2.qaoa]]
-kind = "qpe"
-cost = "masked_cost"
-until_size = 18
-settings = {"ancilla" = 10, "shift" = 0.6}
+# [[int_main2.qaoa]]
+# kind = "qpe"
+# cost = "masked_cost"
+# until_size = 18
+# settings = {"ancilla" = 2, "shift" = 0.6}
+# 
+# [[int_main2.qaoa]]
+# kind = "qpe"
+# cost = "masked_cost"
+# until_size = 18
+# settings = {"ancilla" = 4, "shift" = 0.6}
+# 
+# [[int_main2.qaoa]]
+# kind = "qpe"
+# cost = "masked_cost"
+# until_size = 18
+# settings = {"ancilla" = 6, "shift" = 0.6}
+# 
+# [[int_main2.qaoa]]
+# kind = "qpe"
+# cost = "masked_cost"
+# until_size = 18
+# settings = {"ancilla" = 8, "shift" = 0.6}
+# 
+# [[int_main2.qaoa]]
+# kind = "qpe"
+# cost = "masked_cost"
+# until_size = 18
+# settings = {"ancilla" = 12, "shift" = 0.6}
+# 
+# [[int_main2.qaoa]]
+# kind = "qpe"
+# cost = "masked_cost"
+# until_size = 18
+# settings = {"ancilla" = 14, "shift" = 0.6}
+# 
+# [[int_main2.qaoa]]
+# kind = "qpe"
+# cost = "masked_cost"
+# until_size = 18
+# settings = {"ancilla" = 16, "shift" = 0.6}
+# 
+# [[int_main2.qaoa]]
+# kind = "qpe"
+# cost = "masked_cost"
+# until_size = 18
+# settings = {"ancilla" = 10, "shift" = 0.6}
