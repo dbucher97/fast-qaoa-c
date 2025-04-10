@@ -1,6 +1,9 @@
+import importlib
 from enum import Enum
-import jax
-import jax.numpy as jnp
+
+if importlib.util.find_spec("jax") is not None:
+    import jax
+    import jax.numpy as jnp
 
 class Accuracy(int, Enum):
     single = 32
