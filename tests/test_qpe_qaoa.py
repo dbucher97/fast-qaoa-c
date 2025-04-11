@@ -221,7 +221,7 @@ def test_grad_qpe_qaoa():
 
     interpolator = get_indicator_interpolator(M, 6)
     constr = interpolate_diagonals(interpolator, gs)
-    beta_gradients, gamma_gradients = grad_qpe_qaoa(fs, cs, constr, betas, gammas)
+    _, beta_gradients, gamma_gradients = grad_qpe_qaoa(fs, cs, constr, betas, gammas)
 
     assert allclose(pl_beta_gradients, beta_gradients)
     assert allclose(pl_gamma_gradients, gamma_gradients)

@@ -1,32 +1,29 @@
 [project]
-authors = [
-    {name = "David Bucher", email = "d.bucher97@gmail.com"},
-]
+authors = [{ name = "David Bucher", email = "david.bucher@aqarios.com" }]
 requires-python = "<4.0,>=3.9"
 dependencies = [
     "numpy>=2.0.2",
-    "jax>=0.4.30",
-    "pennylane>=0.35.1",
     "qubovert>=1.2.5",
-    "matplotlib>=3.9.4",
-    "seaborn>=0.13.2",
-    "statsmodels>=0.14.4",
-    "h5py>=3.12.1",
-    "pyarrow>=19.0.0",
     "pandas>=2.2.3",
+    "pyarrow>=19.0.0",
     "pydantic>=2.10.6",
     "tqdm>=4.67.1",
 ]
 name = "fastqaoa"
-version = "0.1.0"
-description = ""
+version = "0.1.1"
+description = "A fast QAOA library written in C. Also features IF-QAOA and IF-QAOA experiments"
 readme = "README.md"
 
 [dependency-groups]
 dev = [
+    "jax>=0.4.30",
+    "pennylane>=0.35.1",
     "pytest<8.0.0,>=7.4.2",
     "ipython<9.0.0,>=8.16.1",
     "jupyterlab>=4.0.7,<5.0.0",
+    "matplotlib>=3.9.4",
+    "seaborn>=0.13.2",
+    "statsmodels>=0.14.4",
     "fastqaoa"
 ]
 

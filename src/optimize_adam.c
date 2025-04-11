@@ -161,7 +161,7 @@ adam_result_t opt_adam_qpe_qaoa(const int depth, const diagonals_t *dg,
   real *grad_betas = (real *)malloc(sizeof(real) * depth);
   real *grad_gammas = (real *)malloc(sizeof(real) * depth);
 
-  printf("ALSO CHANGE OPT QPE QAOA!\n");
+  // printf("ALSO CHANGE OPT QPE QAOA!\n");
   statevector_t *sv_left = sv_malloc(dg->n_qubits);
   statevector_t *sv_right = sv_malloc(dg->n_qubits);
   statevector_t *sv_left_p = sv_malloc(dg->n_qubits);
