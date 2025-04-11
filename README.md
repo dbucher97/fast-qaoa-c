@@ -189,7 +189,7 @@ Therefore, we here benchmark gradients of the two methods
 
 <img src="assets/p6_gradient_comp.png" width="49%" /><img src="assets/n18_grad_comp.png" width="49%"  />
 
-FastQAOA is orders of magnitude faster than Pennylane, allowing for fast, exact, optimization of QAOA parameters in 
+FastQAOA is orders of magnitude faster than Pennylane, allowing for fast, exact, optimization of QAOA parameters.
 
 ## Results of IF-QAOA Paper
 
