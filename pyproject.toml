@@ -26,6 +26,11 @@ dev = [
     "statsmodels>=0.14.4",
     "fastqaoa"
 ]
+qc = [
+    "pylatexenc>=2.10",
+    "qiskit>=2.1.0",
+    "qiskit-ibm-runtime>=0.40.1",
+]
 
 
 [build-system]

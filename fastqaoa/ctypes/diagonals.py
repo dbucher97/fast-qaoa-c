@@ -2,7 +2,6 @@ from typing import List, Union
 from numpy.ctypeslib import ndpointer
 import numpy as np
 import qubovert as qv
-from functools import partial
 
 from .statevector import Statevector
 

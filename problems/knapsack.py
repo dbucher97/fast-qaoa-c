@@ -68,7 +68,7 @@ class Knapsack(ProblemBase):
             self._penalty = new_penalty
         return diag
 
-    def quad_penalty_full_problem(self, n_ancilla: int, penalty: float = None):
+    def slack_problem(self, n_ancilla: int, penalty: float = None):
         if penalty is None:
             if not hasattr(self, "_penalty"):
                 self.quad_penalty_cost()
@@ -84,7 +84,11 @@ class Knapsack(ProblemBase):
         weights = sum(w * x for w, x in zip(self.weights, xs))
         slack = sum(f * y for f, y in zip(yfacs, ys))
 
-        obj = cost + penalty * (weights - slack) ** 2
+        return cost + penalty * (weights - slack) ** 2
+
+
+    def quad_penalty_full_problem(self, n_ancilla: int, penalty: float = None):
+        obj = self.slack_problem(n_ancilla, penalty)
 
         return Diagonals.brute_force_qv(obj)
 
